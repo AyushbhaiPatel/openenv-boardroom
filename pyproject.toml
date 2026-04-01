@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openenv-boardroom"
+version = "0.1.0"
+description = "OpenBoardroom RL environment for OpenEnv"
+requires-python = ">=3.10"
+dependencies = [
+    "openenv-core[core]>=0.2.1",
+    "numpy>=1.19.0",
+    "torch>=2.0.0",
+    "pandas>=1.5.0",
+    "openai>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "hypothesis>=6.0.0",
+]
+
+[project.scripts]
+server = "my_env.server.app:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["my_env*"]

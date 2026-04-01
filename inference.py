@@ -35,7 +35,7 @@ from my_env.models import BoardroomAction
 # ---------------------------------------------------------------------------
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
-API_KEY = os.getenv("HF_TOKEN") or os.getenv("API_KEY")
+HF_TOKEN = os.getenv("HF_TOKEN")
 MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-oss-120b:novita")
 # HuggingFace Space repo id for remote env, or leave unset to use localhost.
 HF_ENV_REPO_ID = os.getenv("HF_ENV_REPO_ID", "ayushbhaiPatel/boardroom-env")
@@ -267,10 +267,10 @@ async def run_episode(env, client, difficulty: str, seed: int) -> float:
 # ---------------------------------------------------------------------------
 
 async def async_main() -> None:
-    if not API_KEY:
-        raise SystemExit("HF_TOKEN (or API_KEY) must be set to query the model.")
+    if not HF_TOKEN:
+        raise SystemExit("HF_TOKEN must be set to query the model.")
 
-    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
     if ENV_BASE_URL:
         env = BoardroomEnv(base_url=ENV_BASE_URL.rstrip("/"))
