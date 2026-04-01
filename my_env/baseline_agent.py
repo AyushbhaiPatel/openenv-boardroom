@@ -66,7 +66,11 @@ def _pick_decision(worst_metric: str) -> tuple[str, dict]:
         return "optimize_revenue", {"strategy": "pricing_adjustment", "target": "premium_tier"}
 
 
-def _build_explanation(worst_metric: str, queried: dict[str, float], stakeholder_feedback: list[str]) -> str:
+def _build_explanation(
+    worst_metric: str,
+    queried: dict[str, float],
+    stakeholder_feedback: list[str],
+) -> str:
     """Build a template explanation referencing data, uncertainty, and stakeholders."""
     metric_summary = ", ".join(f"{k}={v:.4g}" for k, v in queried.items())
     return (

@@ -67,7 +67,10 @@ _SCENARIO_DEFS: Dict[str, Dict[str, Any]] = {
 _RELEVANT_METRICS: Dict[str, set] = {
     "Find the growth bottleneck": {"revenue", "monthly_active_users", "churn_rate", "cac", "ltv"},
     "Diagnose the revenue drop": {"revenue", "churn_rate", "ad_spend", "cac"},
-    "Should we launch Feature X?": {"revenue", "monthly_active_users", "churn_rate", "ad_spend", "cac", "ltv"},
+    "Should we launch Feature X?": {
+        "revenue", "monthly_active_users", "churn_rate", "ad_spend", "cac", "ltv",
+        "support_load", "release_risk",
+    },
 }
 
 # Valid action types
@@ -124,6 +127,9 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         self._consultation_history: List[Dict] = []
         self._episode_history: List[Dict[str, Any]] = []
         self._scenario_resolved: bool = False
+        self._queried_metrics: set[str] = set()
+        self._trend_metrics: set[str] = set()
+        self._simulation_signatures: set[str] = set()
 
     # ------------------------------------------------------------------
     # OpenEnv API: reset
@@ -175,7 +181,10 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
 
         # Initialise subsystems
         self._data_gen = SyntheticDataGenerator(self._seed)
-        self._company_state = self._data_gen.generate_initial_state(self._difficulty)
+        self._company_state = self._data_gen.generate_initial_state(
+            self._difficulty,
+            oracle_answer=self._oracle_answer,
+        )
         self._stakeholders = StakeholderSimulator(self._seed)
         self._cf_engine = CounterfactualEngine(self._seed)
         self._noise = NoiseInjector(self._seed, self._difficulty)
@@ -186,6 +195,9 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         self._scenario_resolved = False
         self._consultation_history = []
         self._episode_history = []
+        self._queried_metrics = set()
+        self._trend_metrics = set()
+        self._simulation_signatures = set()
         self._audit.clear()
 
         # Build initial observation
@@ -194,6 +206,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             "difficulty": self._difficulty,
             "objective": self._scenario.objective,
             "max_steps": self._scenario.max_steps,
+            "brief": self._build_scenario_brief(),
         }
 
         return BoardroomObservation(
@@ -289,6 +302,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             "max_steps": self._scenario.max_steps,
             "difficulty": self._difficulty,
             "seed": self._seed,
+            "brief": self._build_scenario_brief(),
         }
         if done:
             final_score = self._reward_calc.compute_final_score(self._episode_history)
@@ -358,16 +372,18 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
 
         data_tables: Dict[str, Any] = {}
         relevant = False
+        novel = metric not in self._queried_metrics
 
         if metric in snapshot:
             data_tables[metric] = snapshot[metric]
             # Check if metric is relevant to the scenario objective
             relevant_set = _RELEVANT_METRICS.get(self._scenario.objective, set())
             relevant = metric in relevant_set
+            self._queried_metrics.add(metric)
         else:
             data_tables["error"] = f"Unknown metric: {metric}"
 
-        reward_context = {"relevant": relevant}
+        reward_context = {"relevant": relevant, "novel": novel}
         return data_tables, None, None, reward_context
 
     def _handle_analyze_trend(
@@ -397,7 +413,10 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         else:
             noise_handled = quarters >= 3 and len(trend_data) >= 3
 
-        reward_context = {"noise_handled": noise_handled}
+        relevant_set = _RELEVANT_METRICS.get(self._scenario.objective, set())
+        relevant = metric in relevant_set
+        self._trend_metrics.add(metric)
+        reward_context = {"noise_handled": noise_handled, "relevant": relevant}
         return data_tables, None, None, reward_context
 
     def _handle_simulate_counterfactual(
@@ -429,7 +448,10 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             len(decision.strip()) >= 10 and non_empty_params
         )
 
-        reward_context = {"insightful": insightful}
+        signature = f"{decision.strip().lower()}::{sorted(params_d.items())}"
+        novel = signature not in self._simulation_signatures
+        self._simulation_signatures.add(signature)
+        reward_context = {"insightful": insightful, "novel": novel}
         return {}, None, results, reward_context
 
     def _handle_consult_stakeholder(
@@ -450,10 +472,14 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         feedback = self._stakeholders.consult(
             stakeholder=stakeholder,
             company_state=self._company_state,
-            context={"objective": self._scenario.objective},
+            context={
+                "objective": self._scenario.objective,
+                "oracle_answer": self._oracle_answer,
+            },
         )
 
         # Track consultation history
+        novel = stakeholder not in {item["stakeholder"] for item in self._consultation_history}
         self._consultation_history.append({"stakeholder": stakeholder})
 
         # Compute navigation score based on consultation diversity
@@ -461,7 +487,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             self._consultation_history
         )
 
-        reward_context = {"navigation_score": nav_score}
+        reward_context = {"navigation_score": nav_score, "novel": novel}
         return {}, feedback, None, reward_context
 
     def _handle_make_decision(
@@ -470,11 +496,15 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         """Handle make_decision: grade explanation, evolve state, advance quarter."""
         decision = action.parameters["decision"]
         explanation = action.parameters["explanation"]
+        decision_params = action.parameters.get("parameters", {})
+        if not isinstance(decision_params, dict):
+            decision_params = {}
 
         # Grade the explanation
         scenario_context = {
             "objective": self._scenario.objective,
             "difficulty": self._difficulty,
+            "oracle_answer": self._oracle_answer,
         }
         explanation_score = self._grader.grade(explanation, scenario_context)
 
@@ -486,7 +516,17 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             1.0,
             overlap_hits / max(3, len(obj_tokens)) * 1.4,
         ) if obj_tokens else 0.5
-        decision_quality = 0.72 * explanation_score + 0.28 * overlap
+        evidence_quality = self._compute_evidence_quality()
+        decision_alignment = self._score_decision_alignment(decision, explanation)
+        launch_readiness = self._score_launch_readiness(decision, decision_params, explanation)
+        decision_quality = 0.35 * explanation_score + 0.15 * overlap + 0.30 * evidence_quality
+        if self._difficulty == "hard":
+            decision_quality += 0.20 * launch_readiness
+            reward_context_penalty = 1.0 if launch_readiness >= 0.55 else 0.58
+        else:
+            reward_context_penalty = 1.0
+        decision_quality *= decision_alignment
+        decision_quality *= reward_context_penalty
 
         # Evolve company state
         self._data_gen.evolve_state(self._company_state, decision_quality)
@@ -499,6 +539,8 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         reward_context = {
             "decision_quality": decision_quality,
             "explanation_score": explanation_score,
+            "evidence_quality": evidence_quality,
+            "launch_readiness": launch_readiness,
         }
         return data_tables, None, None, reward_context
 
@@ -518,3 +560,93 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             reward=0.0,
             metadata={"error": message},
         )
+
+    def _compute_evidence_quality(self) -> float:
+        metric_cover = len(self._queried_metrics) / 4.0
+        stakeholder_cover = len({entry["stakeholder"] for entry in self._consultation_history}) / 3.0
+        trend_cover = min(len(self._trend_metrics), 2) / 2.0
+        simulation_cover = min(len(self._simulation_signatures), 1)
+
+        if self._difficulty == "easy":
+            score = 0.60 * metric_cover + 0.25 * trend_cover + 0.15 * stakeholder_cover
+        elif self._difficulty == "medium":
+            score = (
+                0.35 * metric_cover
+                + 0.25 * trend_cover
+                + 0.20 * stakeholder_cover
+                + 0.20 * simulation_cover
+            )
+        else:
+            score = (
+                0.20 * metric_cover
+                + 0.20 * trend_cover
+                + 0.25 * stakeholder_cover
+                + 0.35 * simulation_cover
+            )
+            if len({entry["stakeholder"] for entry in self._consultation_history}) < 2:
+                score *= 0.55
+            if not self._simulation_signatures:
+                score *= 0.45
+            hard_required = {"support_load", "release_risk", "churn_rate"}
+            if not hard_required.issubset(self._queried_metrics):
+                score *= 0.52
+        return min(1.0, max(0.0, score))
+
+    def _score_decision_alignment(self, decision: str, explanation: str) -> float:
+        decision_text = f"{decision} {explanation}".lower()
+        if self._difficulty == "easy":
+            return 1.0 if self._oracle_answer.lower() in decision_text else 0.82
+        if self._difficulty == "medium":
+            return 1.0 if self._oracle_answer.lower() in decision_text else 0.72
+
+        if self._oracle_answer == "launch":
+            if "launch" in decision_text and any(token in decision_text for token in ("risk", "support", "capacity")):
+                return 1.0
+            if "launch" in decision_text:
+                return 0.62
+            return 0.24
+
+        if any(token in decision_text for token in ("do not launch", "delay", "hold", "postpone")):
+            return 1.0
+        if "launch" in decision_text:
+            return 0.18
+        return 0.30
+
+    def _build_scenario_brief(self) -> str:
+        if self._difficulty == "easy":
+            return "Board prep: identify the single biggest constraint on sustainable SaaS growth before budgets are set."
+        if self._difficulty == "medium":
+            return "Emergency review: revenue has fallen for multiple quarters and the CFO needs a diagnosis before next week."
+        return "Launch committee: decide whether Feature X should ship this quarter despite support-capacity, quality-risk, and churn concerns."
+
+    def _score_launch_readiness(
+        self,
+        decision: str,
+        decision_params: Dict[str, Any],
+        explanation: str,
+    ) -> float:
+        if self._difficulty != "hard":
+            return 1.0
+        lower = f"{decision} {explanation}".lower()
+        signals = 0
+        for token_group in (
+            ("support", "capacity", "ticket"),
+            ("risk", "rollback", "incident"),
+            ("churn", "retention"),
+            ("cac", "ltv", "unit economics"),
+        ):
+            if any(token in lower for token in token_group):
+                signals += 1
+
+        rollout = decision_params.get("rollout_percentage")
+        headcount = decision_params.get("support_headcount_delta")
+        rollback = decision_params.get("rollback_plan")
+        plan_points = 0.0
+        if isinstance(rollout, (int, float)) and 0 < float(rollout) <= 100:
+            plan_points += 0.40
+        if isinstance(headcount, (int, float)) and float(headcount) >= 0:
+            plan_points += 0.25
+        if isinstance(rollback, str) and len(rollback.strip()) >= 12:
+            plan_points += 0.35
+
+        return min(1.0, 0.55 * min(1.0, signals / 3.0) + 0.45 * plan_points)

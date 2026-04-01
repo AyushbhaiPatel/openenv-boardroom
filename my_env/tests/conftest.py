@@ -82,6 +82,8 @@ def sample_company_state():
         ad_spend=25_000.0,
         cac=120.0,
         ltv=1_500.0,
+        support_load=0.55,
+        release_risk=0.44,
         quarter=1,
         history=[],
     )

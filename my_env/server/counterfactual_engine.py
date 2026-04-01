@@ -27,7 +27,7 @@ except ImportError:
     from models import CompanyState
 
 # Number of features from CompanyState.to_tensor_input()
-_STATE_FEATURES = 6
+_STATE_FEATURES = 8
 # Extra features for hash-based decision encoding
 _DECISION_FEATURES = 4
 _INPUT_DIM = _STATE_FEATURES + _DECISION_FEATURES

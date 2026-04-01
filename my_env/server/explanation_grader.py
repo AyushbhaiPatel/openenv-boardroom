@@ -157,6 +157,7 @@ class ExplanationGrader:
         scenario_bonus = self._score_scenario_alignment(
             explanation, scenario_context
         )
+        oracle_bonus = self._score_oracle_alignment(explanation, scenario_context)
 
         combined = (
             _WEIGHT_DATA_EVIDENCE * data_score
@@ -165,6 +166,7 @@ class ExplanationGrader:
         )
         # Up to +0.15 from objective-aligned phrasing (then re-normalize into [0,1])
         combined = combined * 0.85 + 0.15 * scenario_bonus
+        combined = combined * 0.9 + 0.1 * oracle_bonus
 
         return max(0.0, min(1.0, combined))
 
@@ -219,3 +221,17 @@ class ExplanationGrader:
             hits = sum(1 for p in patterns if p.search(text))
             best = max(best, min(hits / float(len(patterns)), 1.0))
         return best if best > 0 else 0.3
+
+    @staticmethod
+    def _score_oracle_alignment(text: str, scenario_context: Dict[str, Any]) -> float:
+        oracle = ((scenario_context or {}).get("oracle_answer") or "").lower()
+        if not oracle:
+            return 0.5
+        lower = text.lower()
+        if oracle in lower:
+            return 1.0
+        if oracle == "do not launch" and any(token in lower for token in ("delay", "hold", "postpone")):
+            return 0.9
+        if oracle == "launch" and "launch" in lower:
+            return 0.9
+        return 0.25
