@@ -13,6 +13,7 @@ reward calculation, explanation grading, noise injection, and audit trail.
 """
 
 import random
+import re
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
@@ -90,6 +91,21 @@ _REQUIRED_PARAMS: Dict[str, set] = {
     "consult_stakeholder": {"stakeholder"},
     "make_decision": {"decision", "parameters", "explanation"},
 }
+
+_ORACLE_TEXT_ALIASES: Dict[str, tuple[str, ...]] = {
+    "monthly_active_users": ("monthly active users", "monthly-active-users", "active users", "mau"),
+    "churn_rate": ("churn rate", "churn", "retention"),
+    "ad_spend": ("ad spend", "ad-spend", "marketing spend"),
+    "cac": ("cac", "customer acquisition cost"),
+}
+
+_NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\bdo not launch\b", re.IGNORECASE),
+    re.compile(r"\bdon't launch\b", re.IGNORECASE),
+    re.compile(r"\bdelay(?:ed|ing)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bhold(?:ing)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bpostpone(?:d|ment)?\s+launch\b", re.IGNORECASE),
+)
 
 
 class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, State]):
@@ -595,19 +611,30 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
 
     def _score_decision_alignment(self, decision: str, explanation: str) -> float:
         decision_text = f"{decision} {explanation}".lower()
+        normalized_oracle = self._oracle_answer.lower()
+        oracle_variants = {
+            normalized_oracle,
+            normalized_oracle.replace("_", " "),
+            normalized_oracle.replace("_", "-"),
+            *_ORACLE_TEXT_ALIASES.get(normalized_oracle, ()),
+        }
+        oracle_hit = any(variant and variant in decision_text for variant in oracle_variants)
+        negative_launch = any(pattern.search(decision_text) for pattern in _NEGATIVE_LAUNCH_PATTERNS)
         if self._difficulty == "easy":
-            return 1.0 if self._oracle_answer.lower() in decision_text else 0.82
+            return 1.0 if oracle_hit else 0.82
         if self._difficulty == "medium":
-            return 1.0 if self._oracle_answer.lower() in decision_text else 0.72
+            return 1.0 if oracle_hit else 0.72
 
         if self._oracle_answer == "launch":
+            if negative_launch:
+                return 0.24
             if "launch" in decision_text and any(token in decision_text for token in ("risk", "support", "capacity")):
                 return 1.0
             if "launch" in decision_text:
                 return 0.62
             return 0.24
 
-        if any(token in decision_text for token in ("do not launch", "delay", "hold", "postpone")):
+        if negative_launch:
             return 1.0
         if "launch" in decision_text:
             return 0.18

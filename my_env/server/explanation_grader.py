@@ -113,6 +113,14 @@ _ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
     "do not launch": ("do not launch", "delay", "hold", "postpone"),
 }
 
+_NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\bdo not launch\b", re.IGNORECASE),
+    re.compile(r"\bdon't launch\b", re.IGNORECASE),
+    re.compile(r"\bdelay(?:ed|ing)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bhold(?:ing)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bpostpone(?:d|ment)?\s+launch\b", re.IGNORECASE),
+)
+
 # ---------------------------------------------------------------------------
 # Component weights (must sum to 1.0)
 # ---------------------------------------------------------------------------
@@ -235,6 +243,7 @@ class ExplanationGrader:
         if not oracle:
             return 0.5
         lower = text.lower()
+        negative_launch = any(pattern.search(lower) for pattern in _NEGATIVE_LAUNCH_PATTERNS)
         aliases = _ORACLE_ALIASES.get(oracle, ())
         normalized_candidates = {
             oracle,
@@ -242,6 +251,8 @@ class ExplanationGrader:
             oracle.replace("_", "-"),
             *aliases,
         }
+        if oracle == "launch" and negative_launch:
+            return 0.25
         if any(candidate and candidate in lower for candidate in normalized_candidates):
             return 1.0
         if oracle == "do not launch" and any(token in lower for token in ("delay", "hold", "postpone")):
