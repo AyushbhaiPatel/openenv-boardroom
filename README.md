@@ -120,7 +120,7 @@ The benchmark exposes 3 deterministic tasks, each with a programmatic grader tha
 | Diagnose the Revenue Drop | Medium | Noise-aware trend analysis, stakeholder diversity, explanation quality, oracle match |
 | Should We Launch Feature X? | Hard | Counterfactual quality, stakeholder navigation, launch reasoning, structured rollout plan, oracle match |
 
-Grading is deterministic for a fixed seed. Final scoring combines dense step rewards from [reward_calculator.py](/Users/ayush/Desktop/openenv-project/my_env/server/reward_calculator.py) and explanation quality from [explanation_grader.py](/Users/ayush/Desktop/openenv-project/my_env/server/explanation_grader.py). On episode completion, the environment emits `final_score`, `oracle_answer`, and `oracle_hit` in observation metadata for auditability.
+Grading is deterministic for a fixed seed. Final scoring combines dense step rewards from [reward_calculator.py](my_env/server/reward_calculator.py) and explanation quality from [explanation_grader.py](my_env/server/explanation_grader.py). On episode completion, the environment emits `final_score`, `oracle_answer`, and `oracle_hit` in observation metadata for auditability.
 
 Illustrative hard-task grading behavior:
 - Generic response: `"launch feature x"` with no rollout plan and no rollback path scores poorly.

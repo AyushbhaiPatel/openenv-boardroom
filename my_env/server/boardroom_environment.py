@@ -415,7 +415,8 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
 
         relevant_set = _RELEVANT_METRICS.get(self._scenario.objective, set())
         relevant = metric in relevant_set
-        self._trend_metrics.add(metric)
+        if trend_data and relevant:
+            self._trend_metrics.add(metric)
         reward_context = {"noise_handled": noise_handled, "relevant": relevant}
         return data_tables, None, None, reward_context
 

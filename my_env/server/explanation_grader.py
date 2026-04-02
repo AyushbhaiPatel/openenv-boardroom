@@ -106,6 +106,13 @@ _STAKEHOLDER_KEYWORDS: list[str] = [
     "feedback",
 ]
 
+_ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
+    "ad_spend": ("ad spend", "ad-spend", "marketing spend"),
+    "monthly_active_users": ("monthly active users", "active users", "mau"),
+    "churn_rate": ("churn rate", "churn", "retention"),
+    "do not launch": ("do not launch", "delay", "hold", "postpone"),
+}
+
 # ---------------------------------------------------------------------------
 # Component weights (must sum to 1.0)
 # ---------------------------------------------------------------------------
@@ -228,7 +235,14 @@ class ExplanationGrader:
         if not oracle:
             return 0.5
         lower = text.lower()
-        if oracle in lower:
+        aliases = _ORACLE_ALIASES.get(oracle, ())
+        normalized_candidates = {
+            oracle,
+            oracle.replace("_", " "),
+            oracle.replace("_", "-"),
+            *aliases,
+        }
+        if any(candidate and candidate in lower for candidate in normalized_candidates):
             return 1.0
         if oracle == "do not launch" and any(token in lower for token in ("delay", "hold", "postpone")):
             return 0.9
