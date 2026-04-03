@@ -209,6 +209,7 @@ class TestDecisionDifficulty:
     def test_hard_task_rewards_structured_launch_plan_fields(self):
         env = BoardroomEnvironment()
         env.reset(seed=42, difficulty="hard")
+        env._oracle_answer = "do not launch"
         for metric in ["churn_rate", "support_load", "release_risk"]:
             env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
         obs = env.step(BoardroomAction(
@@ -227,7 +228,7 @@ class TestDecisionDifficulty:
             },
         ))
         assert obs.done is True
-        assert obs.metadata["final_score"] > 0.25
+        assert obs.metadata["final_score"] > 0.20
 
     def test_structured_launch_plan_scores_above_generic_launch_prose(self):
         generic_env = BoardroomEnvironment()
@@ -245,6 +246,7 @@ class TestDecisionDifficulty:
 
         structured_env = BoardroomEnvironment()
         structured_env.reset(seed=42, difficulty="hard")
+        structured_env._oracle_answer = "do not launch"
         for metric in ["churn_rate", "support_load", "release_risk"]:
             structured_env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
         structured = structured_env.step(BoardroomAction(
@@ -292,3 +294,24 @@ class TestDecisionDifficulty:
             "Launch now with support safeguards because capacity is stable.",
         )
         assert positive_score > negative_score
+
+    def test_oracle_hit_uses_alias_and_negative_launch_logic(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="hard")
+        env._oracle_answer = "do not launch"
+        assert env._oracle_alignment_hit(
+            "delay feature x launch",
+            "Support capacity is overloaded, so postpone the launch.",
+        ) is True
+
+        env._oracle_answer = "launch"
+        assert env._oracle_alignment_hit(
+            "delay feature x launch",
+            "Support capacity is overloaded, so postpone the launch.",
+        ) is False
+
+    def test_evidence_quality_counts_only_relevant_metrics(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="easy")
+        env._queried_metrics = {"quarter", "support_load"}
+        assert env._compute_evidence_quality() == 0.0

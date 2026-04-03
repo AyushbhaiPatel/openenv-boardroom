@@ -101,3 +101,15 @@ class TestExplanationGrader:
             "We should launch Feature X with support safeguards.", ctx
         )
         assert positive_score > negative_score
+
+    def test_negative_launch_aliases_get_partial_credit(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "do not launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should delay feature x launch until support capacity improves.", ctx
+        )
+        assert score == 0.9
+
+    def test_hard_metric_vocabulary_counts_as_data_evidence(self) -> None:
+        without = "We should wait and gather more input."
+        with_hard_metrics = "Support load is elevated and release risk remains high."
+        assert self.grader.grade(with_hard_metrics, self.ctx) > self.grader.grade(without, self.ctx)

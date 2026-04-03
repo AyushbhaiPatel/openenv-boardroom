@@ -102,9 +102,9 @@ _ORACLE_TEXT_ALIASES: Dict[str, tuple[str, ...]] = {
 _NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\bdo not launch\b", re.IGNORECASE),
     re.compile(r"\bdon't launch\b", re.IGNORECASE),
-    re.compile(r"\bdelay(?:ed|ing)?\s+launch\b", re.IGNORECASE),
-    re.compile(r"\bhold(?:ing)?\s+launch\b", re.IGNORECASE),
-    re.compile(r"\bpostpone(?:d|ment)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bdelay(?:ed|ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bhold(?:ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bpostpone(?:d|ment)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
 )
 
 
@@ -328,8 +328,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             if self._oracle_answer and action.action_type == "make_decision":
                 decision_text = (action.parameters.get("decision") or "").lower()
                 explanation_text = (action.parameters.get("explanation") or "").lower()
-                oracle_hit = self._oracle_answer.lower() in decision_text or \
-                             self._oracle_answer.lower() in explanation_text
+                oracle_hit = self._oracle_alignment_hit(decision_text, explanation_text)
             if oracle_hit:
                 final_score = min(1.0, final_score + 0.05)
 
@@ -579,7 +578,9 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         )
 
     def _compute_evidence_quality(self) -> float:
-        metric_cover = len(self._queried_metrics) / 4.0
+        relevant_metrics = _RELEVANT_METRICS.get(self._scenario.objective, set())
+        relevant_queried_metrics = self._queried_metrics.intersection(relevant_metrics)
+        metric_cover = min(len(relevant_queried_metrics), 4) / 4.0
         stakeholder_cover = len({entry["stakeholder"] for entry in self._consultation_history}) / 3.0
         trend_cover = min(len(self._trend_metrics), 2) / 2.0
         simulation_cover = min(len(self._simulation_signatures), 1)
@@ -612,13 +613,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
     def _score_decision_alignment(self, decision: str, explanation: str) -> float:
         decision_text = f"{decision} {explanation}".lower()
         normalized_oracle = self._oracle_answer.lower()
-        oracle_variants = {
-            normalized_oracle,
-            normalized_oracle.replace("_", " "),
-            normalized_oracle.replace("_", "-"),
-            *_ORACLE_TEXT_ALIASES.get(normalized_oracle, ()),
-        }
-        oracle_hit = any(variant and variant in decision_text for variant in oracle_variants)
+        oracle_hit = self._text_matches_oracle(decision_text, normalized_oracle)
         negative_launch = any(pattern.search(decision_text) for pattern in _NEGATIVE_LAUNCH_PATTERNS)
         if self._difficulty == "easy":
             return 1.0 if oracle_hit else 0.82
@@ -639,6 +634,28 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         if "launch" in decision_text:
             return 0.18
         return 0.30
+
+    def _text_matches_oracle(self, text: str, oracle: str) -> bool:
+        aliases = _ORACLE_TEXT_ALIASES.get(oracle, ())
+        oracle_variants = {
+            oracle,
+            oracle.replace("_", " "),
+            oracle.replace("_", "-"),
+            *aliases,
+        }
+        negative_launch = any(pattern.search(text) for pattern in _NEGATIVE_LAUNCH_PATTERNS)
+        if oracle == "launch" and negative_launch:
+            return False
+        if oracle == "do not launch" and negative_launch:
+            return True
+        return any(variant and variant in text for variant in oracle_variants)
+
+    def _oracle_alignment_hit(self, decision_text: str, explanation_text: str) -> bool:
+        normalized_oracle = self._oracle_answer.lower()
+        return (
+            self._text_matches_oracle(decision_text, normalized_oracle)
+            or self._text_matches_oracle(explanation_text, normalized_oracle)
+        )
 
     def _build_scenario_brief(self) -> str:
         if self._difficulty == "easy":
