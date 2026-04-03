@@ -113,3 +113,11 @@ class TestExplanationGrader:
         without = "We should wait and gather more input."
         with_hard_metrics = "Support load is elevated and release risk remains high."
         assert self.grader.grade(with_hard_metrics, self.ctx) > self.grader.grade(without, self.ctx)
+
+    def test_common_business_aliases_count_for_oracle_alignment(self) -> None:
+        revenue_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "revenue"}
+        cac_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "cac"}
+        ltv_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "ltv"}
+        assert self.grader._score_oracle_alignment("Sales are slipping quarter over quarter.", revenue_ctx) > 0.25
+        assert self.grader._score_oracle_alignment("Customer acquisition cost is rising sharply.", cac_ctx) > 0.25
+        assert self.grader._score_oracle_alignment("Customer lifetime value is improving.", ltv_ctx) > 0.25

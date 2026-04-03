@@ -4,6 +4,7 @@ import math
 
 from my_env.models import BoardroomAction
 from my_env.server.boardroom_environment import BoardroomEnvironment
+from my_env.server.data_generator import SyntheticDataGenerator
 
 
 class TestReset:
@@ -315,3 +316,14 @@ class TestDecisionDifficulty:
         env.reset(seed=42, difficulty="easy")
         env._queried_metrics = {"quarter", "support_load"}
         assert env._compute_evidence_quality() == 0.0
+
+
+class TestDataEvolution:
+    def test_evolve_state_updates_hard_mode_risk_signals(self):
+        generator = SyntheticDataGenerator(seed=42)
+        state = generator.generate_initial_state("hard", oracle_answer="do not launch")
+        before_support = state.support_load
+        before_risk = state.release_risk
+        generator.evolve_state(state, decision_quality=0.9)
+        assert state.support_load != before_support
+        assert state.release_risk != before_risk
