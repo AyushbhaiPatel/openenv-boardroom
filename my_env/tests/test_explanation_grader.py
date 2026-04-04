@@ -114,6 +114,11 @@ class TestExplanationGrader:
         with_hard_metrics = "Support load is elevated and release risk remains high."
         assert self.grader.grade(with_hard_metrics, self.ctx) > self.grader.grade(without, self.ctx)
 
+    def test_generic_support_or_release_language_does_not_count_as_metric_evidence(self) -> None:
+        vague = self.grader.grade("I support the plan and we should release next week.", self.ctx)
+        precise = self.grader.grade("Support load is high and release risk remains elevated.", self.ctx)
+        assert precise > vague
+
     def test_common_business_aliases_count_for_oracle_alignment(self) -> None:
         revenue_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "revenue"}
         cac_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "cac"}

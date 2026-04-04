@@ -105,6 +105,12 @@ class TestStep:
         ))
         assert len(obs.data_tables["trend"]) >= 4
 
+    def test_reset_history_has_monotonic_quarters(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="medium")
+        quarters = [entry["quarter"] for entry in env._company_state.history]
+        assert quarters == sorted(quarters)
+
 
 class TestErrorHandling:
     def test_invalid_params_no_step_advance(self):
