@@ -265,11 +265,13 @@ class ExplanationGrader:
             oracle.replace("_", "-"),
             *aliases,
         }
+        def has_candidate(candidate: str) -> bool:
+            return bool(re.search(r"(?<!\w)" + re.escape(candidate) + r"(?!\w)", lower))
         if oracle == "launch" and negative_launch:
             return 0.25
         if oracle == "do not launch" and negative_launch:
             return 0.9
-        if any(candidate and candidate in lower for candidate in normalized_candidates):
+        if any(candidate and has_candidate(candidate) for candidate in normalized_candidates):
             return 1.0
         if oracle == "launch" and "launch" in lower:
             return 0.9

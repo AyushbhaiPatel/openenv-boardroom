@@ -215,8 +215,7 @@ class TestDecisionDifficulty:
 
     def test_hard_task_rewards_structured_launch_plan_fields(self):
         env = BoardroomEnvironment()
-        env.reset(seed=42, difficulty="hard")
-        env._oracle_answer = "do not launch"
+        env.reset(seed=1, difficulty="hard")
         for metric in ["churn_rate", "support_load", "release_risk"]:
             env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
         obs = env.step(BoardroomAction(
@@ -252,8 +251,7 @@ class TestDecisionDifficulty:
         ))
 
         structured_env = BoardroomEnvironment()
-        structured_env.reset(seed=42, difficulty="hard")
-        structured_env._oracle_answer = "do not launch"
+        structured_env.reset(seed=1, difficulty="hard")
         for metric in ["churn_rate", "support_load", "release_risk"]:
             structured_env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
         structured = structured_env.step(BoardroomAction(
