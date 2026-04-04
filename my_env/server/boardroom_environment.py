@@ -676,7 +676,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         lower = f"{decision} {explanation}".lower()
         signals = 0
         for token_group in (
-            ("support", "capacity", "ticket"),
+            ("support load", "support capacity", "ticket backlog", "ticket volume"),
             ("risk", "rollback", "incident"),
             ("churn", "retention"),
             ("cac", "ltv", "unit economics"),
