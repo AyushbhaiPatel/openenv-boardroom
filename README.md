@@ -138,9 +138,9 @@ Latest local run from the project venv produced:
 
 | Difficulty | Mean Score | Std Dev |
 |---|---:|---:|
-| Easy | 0.8225 | 0.0851 |
-| Medium | 0.7331 | 0.0700 |
-| Hard | 0.7430 | 0.0081 |
+| Easy | 0.9581 | 0.0287 |
+| Medium | 0.7988 | 0.0539 |
+| Hard | 0.8533 | 0.0122 |
 
 ## Project Structure
 

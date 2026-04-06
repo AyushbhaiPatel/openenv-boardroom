@@ -75,15 +75,6 @@ _RELEVANT_METRICS: Dict[str, set] = {
     },
 }
 
-_SUPPORTING_METRICS: Dict[str, set[str]] = {
-    "churn_rate": {"revenue", "monthly_active_users"},
-    "monthly_active_users": {"revenue", "churn_rate"},
-    "cac": {"revenue", "ad_spend", "ltv"},
-    "ad_spend": {"revenue", "cac"},
-    "launch": {"support_load", "release_risk", "churn_rate", "monthly_active_users"},
-    "do not launch": {"support_load", "release_risk", "churn_rate", "cac", "ltv"},
-}
-
 # Valid action types
 _VALID_ACTION_TYPES = {
     "query_data",
@@ -408,12 +399,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         else:
             data_tables["error"] = f"Unknown metric: {metric}"
 
-        reward_context = {
-            "relevant": relevant,
-            "novel": novel,
-            "oracle_match": metric == self._oracle_answer,
-            "supporting": metric in _SUPPORTING_METRICS.get(self._oracle_answer, set()),
-        }
+        reward_context = {"relevant": relevant, "novel": novel}
         return data_tables, None, None, reward_context
 
     def _handle_analyze_trend(
