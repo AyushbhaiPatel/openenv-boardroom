@@ -76,6 +76,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
 .diff-card{background:#0d1117;border:2px solid #30363d;border-radius:10px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .2s}
 .diff-card:hover{border-color:#58a6ff;transform:translateY(-2px)}
 .diff-card.selected{border-color:#58a6ff;background:#0c2135}
+.diff-card:focus-visible,.action-btn:focus-visible{outline:2px solid #58a6ff;outline-offset:2px}
 .diff-card .diff-icon{font-size:1.6rem;margin-bottom:6px}
 .diff-card .diff-name{font-weight:700;font-size:0.9rem}
 .diff-card .diff-desc{font-size:0.72rem;color:#8b949e;margin-top:4px;line-height:1.4}
@@ -140,6 +141,24 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
 
 .hidden{display:none}
 .loading{opacity:.6;pointer-events:none}
+.panel-loading{position:relative}
+.panel-loading::after{content:"";position:absolute;inset:0;background:rgba(13,17,23,.55);border-radius:12px;z-index:1}
+.panel-loading::before{content:"Please wait — processing your action";position:absolute;top:16px;right:16px;background:#0c2135;color:#93c5fd;border:1px solid #1f6feb;border-radius:999px;padding:6px 10px;font-size:.74rem;font-weight:600;letter-spacing:.02em;z-index:2}
+.hint-strip{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+.hint-pill{background:#0d1117;border:1px solid #30363d;color:#8b949e;border-radius:999px;padding:6px 10px;font-size:.74rem}
+.hint-pill strong{color:#58a6ff;font-weight:700}
+.result-section{margin-top:10px}
+.result-section-title{font-size:.72rem;color:#8b949e;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+.result-empty{color:#8b949e;font-size:.85rem}
+.action-btn.busy,.diff-card.busy{pointer-events:none;opacity:.55;cursor:not-allowed}
+.action-btn.disabled-state{border-color:#484f58;background:#161b22}
+.action-btn.disabled-state .action-name,.action-btn.disabled-state .action-hint{color:#8b949e}
+.status-note{margin:8px 0 14px;padding:10px 12px;border-radius:8px;background:#0d1117;border:1px solid #30363d;color:#8b949e;font-size:.8rem}
+.status-note strong{color:#93c5fd}
+@media (max-width: 720px){
+  .diff-grid{grid-template-columns:1fr}
+  .metric-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -168,19 +187,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
       <div class="card-title">Choose your challenge</div>
       <div class="card-sub">Pick a difficulty. The AI agent (or you!) will try to solve the business problem.</div>
       <div class="diff-grid">
-        <div class="diff-card selected" id="diff-easy" onclick="pickDiff('easy')">
+        <div class="diff-card selected" id="diff-easy" role="button" tabindex="0" aria-pressed="true" onkeydown="handleCardKey(event, function(){ pickDiff('easy'); })" onclick="pickDiff('easy')">
           <div class="diff-icon">🟢</div>
           <div class="diff-name">Easy</div>
           <div class="diff-desc">Find the Growth Bottleneck</div>
           <div class="diff-steps">10 steps · Clean data</div>
         </div>
-        <div class="diff-card" id="diff-medium" onclick="pickDiff('medium')">
+        <div class="diff-card" id="diff-medium" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickDiff('medium'); })" onclick="pickDiff('medium')">
           <div class="diff-icon">🟡</div>
           <div class="diff-name">Medium</div>
           <div class="diff-desc">Diagnose the Revenue Drop</div>
           <div class="diff-steps">20 steps · Noisy data</div>
         </div>
-        <div class="diff-card" id="diff-hard" onclick="pickDiff('hard')">
+        <div class="diff-card" id="diff-hard" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickDiff('hard'); })" onclick="pickDiff('hard')">
           <div class="diff-icon">🔴</div>
           <div class="diff-name">Hard</div>
           <div class="diff-desc">Should We Launch Feature X?</div>
@@ -197,6 +216,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
     <div id="objective-banner" style="background:#0c2135;border:1px solid #1f6feb;border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:0.85rem;color:#93c5fd">
       🎯 <span id="objective-text">Loading...</span>
     </div>
+    <div class="hint-strip" id="hint-strip"></div>
+    <div class="status-note" id="status-note"><strong>Ready:</strong> Choose an action and press Send.</div>
 
     <!-- Progress -->
     <div class="step-counter">Step <span id="cur-step">0</span> / <span id="max-step">10</span></div>
@@ -211,27 +232,27 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
     </div>
 
     <!-- Action picker -->
-    <div class="card">
+    <div class="card" id="action-panel">
       <div class="card-title">What do you want to do?</div>
       <div class="card-sub">Pick an action, fill in the details, then hit Send.</div>
       <div class="action-grid">
-        <div class="action-btn selected" id="act-query_data" onclick="pickAction('query_data')">
+        <div class="action-btn selected" id="act-query_data" role="button" tabindex="0" aria-pressed="true" onkeydown="handleCardKey(event, function(){ pickAction('query_data'); })" onclick="pickAction('query_data')">
           <span class="action-icon">📈</span>
           <div><div class="action-name">Look up a metric</div><div class="action-hint">Check a number like revenue or churn rate</div></div>
         </div>
-        <div class="action-btn" id="act-analyze_trend" onclick="pickAction('analyze_trend')">
+        <div class="action-btn" id="act-analyze_trend" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('analyze_trend'); })" onclick="pickAction('analyze_trend')">
           <span class="action-icon">📉</span>
           <div><div class="action-name">Analyze a trend</div><div class="action-hint">See how a metric changed over time</div></div>
         </div>
-        <div class="action-btn" id="act-consult_stakeholder" onclick="pickAction('consult_stakeholder')">
+        <div class="action-btn" id="act-consult_stakeholder" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('consult_stakeholder'); })" onclick="pickAction('consult_stakeholder')">
           <span class="action-icon">💬</span>
           <div><div class="action-name">Ask a colleague</div><div class="action-hint">Get advice from analyst, CEO, or risk officer</div></div>
         </div>
-        <div class="action-btn" id="act-simulate_counterfactual" onclick="pickAction('simulate_counterfactual')">
+        <div class="action-btn" id="act-simulate_counterfactual" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('simulate_counterfactual'); })" onclick="pickAction('simulate_counterfactual')">
           <span class="action-icon">🔬</span>
           <div><div class="action-name">Run a simulation</div><div class="action-hint">Test what would happen with a decision</div></div>
         </div>
-        <div class="action-btn" id="act-make_decision" onclick="pickAction('make_decision')">
+        <div class="action-btn" id="act-make_decision" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('make_decision'); })" onclick="pickAction('make_decision')">
           <span class="action-icon">✅</span>
           <div><div class="action-name">Make final decision</div><div class="action-hint">Submit your conclusion and end the episode</div></div>
         </div>
@@ -248,6 +269,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
             <option value="ad_spend">📢 Ad Spend</option>
             <option value="cac">🎯 Customer Acquisition Cost (CAC)</option>
             <option value="ltv">💎 Lifetime Value (LTV)</option>
+            <option value="support_load">🛟 Support Load</option>
+            <option value="release_risk">⚠️ Release Risk</option>
           </select>
         </div>
       </div>
@@ -262,6 +285,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
             <option value="ad_spend">📢 Ad Spend</option>
             <option value="cac">🎯 CAC</option>
             <option value="ltv">💎 LTV</option>
+            <option value="support_load">🛟 Support Load</option>
+            <option value="release_risk">⚠️ Release Risk</option>
           </select>
         </div>
         <div class="param-field">
@@ -336,6 +361,65 @@ let maxStep = 10;
 let totalReward = 0;
 let ws = null;
 let pendingResolve = null;
+let pendingReject = null;
+let requestInFlight = false;
+const difficultyHints = {
+  easy: ['Focus on <strong>core bottlenecks</strong>', 'Start with <strong>revenue</strong>, <strong>MAU</strong>, or <strong>churn</strong>'],
+  medium: ['Check <strong>trend direction</strong>', 'Revenue-drop tasks often need <strong>ad spend</strong> and <strong>CAC</strong> context'],
+  hard: ['Launch tasks reward <strong>support load</strong> and <strong>release risk</strong>', 'Use <strong>stakeholders</strong> and a <strong>rollback plan</strong> before deciding'],
+};
+
+function setBusyState(isBusy) {
+  requestInFlight = isBusy;
+  const actionPanel = document.getElementById('action-panel');
+  const sendBtn = document.getElementById('send-btn');
+  const statusNote = document.getElementById('status-note');
+  if (actionPanel) {
+    actionPanel.classList.toggle('panel-loading', isBusy);
+    actionPanel.setAttribute('aria-busy', String(isBusy));
+  }
+  if (sendBtn) {
+    sendBtn.disabled = isBusy;
+    sendBtn.textContent = isBusy ? '⏳ Please wait...' : 'Send Action';
+    sendBtn.setAttribute('aria-disabled', String(isBusy));
+  }
+  ['query_data','analyze_trend','consult_stakeholder','simulate_counterfactual','make_decision'].forEach(function(x) {
+    const el = document.getElementById('act-'+x);
+    if (el) {
+      el.classList.toggle('busy', isBusy);
+      el.classList.toggle('disabled-state', isBusy);
+      el.setAttribute('aria-disabled', String(isBusy));
+      el.setAttribute('tabindex', isBusy ? '-1' : '0');
+    }
+  });
+  ['easy','medium','hard'].forEach(function(x) {
+    const el = document.getElementById('diff-'+x);
+    if (el) {
+      el.classList.toggle('busy', isBusy);
+      el.setAttribute('aria-disabled', String(isBusy));
+      el.setAttribute('tabindex', isBusy ? '-1' : '0');
+    }
+  });
+  if (statusNote) {
+    statusNote.innerHTML = isBusy
+      ? '<strong>Please wait:</strong> The environment is processing your previous action.'
+      : '<strong>Ready:</strong> Choose an action and press Send.';
+  }
+}
+
+function renderHints() {
+  const strip = document.getElementById('hint-strip');
+  if (!strip) return;
+  const hints = difficultyHints[selectedDiff] || [];
+  strip.innerHTML = hints.map(function(hint){ return '<div class="hint-pill">'+hint+'</div>'; }).join('');
+}
+
+function handleCardKey(event, action) {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault();
+    action();
+  }
+}
 
 // WebSocket helpers — all game state lives in one persistent WS connection
 function openWS() {
@@ -344,15 +428,35 @@ function openWS() {
     const sock = new WebSocket(proto + '://' + location.host + '/ws');
     sock.onopen  = () => { ws = sock; resolve(); };
     sock.onerror = () => reject(new Error('WebSocket failed'));
-    sock.onmessage = (e) => { if (pendingResolve) { const fn = pendingResolve; pendingResolve = null; fn(JSON.parse(e.data)); } };
-    sock.onclose = () => { ws = null; };
+    sock.onmessage = (e) => {
+      if (pendingResolve) {
+        const resolveFn = pendingResolve;
+        pendingResolve = null;
+        pendingReject = null;
+        setBusyState(false);
+        resolveFn(JSON.parse(e.data));
+      }
+    };
+    sock.onclose = () => {
+      ws = null;
+      setBusyState(false);
+      if (pendingReject) {
+        const rejectFn = pendingReject;
+        pendingResolve = null;
+        pendingReject = null;
+        rejectFn(new Error('Connection closed'));
+      }
+    };
   });
 }
 
 function wsSend(msg) {
   return new Promise((resolve, reject) => {
     if (!ws || ws.readyState !== 1) { reject(new Error('Not connected')); return; }
+    if (pendingResolve || requestInFlight) { reject(new Error('Previous action is still in progress')); return; }
+    setBusyState(true);
     pendingResolve = resolve;
+    pendingReject = reject;
     ws.send(JSON.stringify(msg));
   });
 }
@@ -367,14 +471,23 @@ function parseObs(resp) {
 }
 
 function pickDiff(d) {
+  if (requestInFlight) return;
   selectedDiff = d;
-  ['easy','medium','hard'].forEach(x => document.getElementById('diff-'+x).classList.toggle('selected', x===d));
+  ['easy','medium','hard'].forEach(x => {
+    const el = document.getElementById('diff-'+x);
+    el.classList.toggle('selected', x===d);
+    el.setAttribute('aria-pressed', String(x===d));
+  });
+  renderHints();
 }
 
 function pickAction(a) {
+  if (requestInFlight) return;
   selectedAction = a;
   ['query_data','analyze_trend','consult_stakeholder','simulate_counterfactual','make_decision'].forEach(x => {
-    document.getElementById('act-'+x).classList.toggle('selected', x===a);
+    const actionBtn = document.getElementById('act-'+x);
+    actionBtn.classList.toggle('selected', x===a);
+    actionBtn.setAttribute('aria-pressed', String(x===a));
     document.getElementById('params-'+x).classList.toggle('hidden', x!==a);
   });
 }
@@ -397,10 +510,14 @@ function setScreen(n) {
 
 async function startGame() {
   const btn = event.currentTarget;
+  if (requestInFlight) { showToast('Please wait for the current request to finish.', 'error'); return; }
   btn.disabled = true; btn.textContent = '⏳ Connecting...';
   try {
     // Close stale connection before opening a fresh one
     if (ws) { try { ws.close(); } catch(e){} ws = null; }
+    pendingResolve = null;
+    pendingReject = null;
+    requestInFlight = false;
     await openWS();
     btn.textContent = '⏳ Starting...';
     const resp = await wsSend({type:'reset', data:{difficulty: selectedDiff, seed: 0}});
@@ -414,9 +531,15 @@ async function startGame() {
     document.getElementById('progress-bar').style.width = '0%';
     document.getElementById('last-result').classList.add('hidden');
     setScreen(2);
+    renderHints();
     pickAction('query_data');
     showToast('Episode started! Good luck 🚀');
-  } catch(e) { showToast('Failed to connect: '+e.message, 'error'); }
+  } catch(e) {
+    setBusyState(false);
+    pendingResolve = null;
+    pendingReject = null;
+    showToast('Failed to connect: '+e.message, 'error');
+  }
   btn.disabled = false; btn.textContent = '▶ Start Episode';
 }
 
@@ -443,23 +566,23 @@ function buildAction() {
 function renderResult(obs, reward) {
   let html = '';
   if(obs.data_tables && Object.keys(obs.data_tables).filter(function(k){return k!=='quarter';}).length) {
-    html += '<div class="metric-grid">';
+    html += '<div class="result-section"><div class="result-section-title">Data</div><div class="metric-grid">';
     for(const [k,v] of Object.entries(obs.data_tables)) {
       if(k==='quarter') continue;
       const fmt = (v===null||v===undefined) ? 'N/A' : (typeof v==='number'?(v>1000?v.toLocaleString('en',{maximumFractionDigits:0}):(+v).toFixed(3)):String(v));
       html += '<div class="metric-tile"><div class="mname">'+k.replace(/_/g,' ')+'</div><div class="mval">'+fmt+'</div></div>';
     }
-    html += '</div>';
+    html += '</div></div>';
   }
   if(obs.stakeholder_feedback) {
-    html += '<div class="feedback-box" style="margin-top:10px"><div class="feedback-label">💬 Colleague says</div>'+obs.stakeholder_feedback+'</div>';
+    html += '<div class="result-section"><div class="feedback-box"><div class="feedback-label">💬 Colleague says</div>'+obs.stakeholder_feedback+'</div></div>';
   }
   if(obs.simulation_results && Object.keys(obs.simulation_results).length) {
-    html += '<div class="feedback-box" style="margin-top:10px"><div class="feedback-label">🔬 Simulation result</div>';
+    html += '<div class="result-section"><div class="feedback-box"><div class="feedback-label">🔬 Simulation result</div>';
     for(const [k,v] of Object.entries(obs.simulation_results)) {
       html += '<div style="margin-top:4px"><span style="color:#8b949e">'+k+':</span> <b>'+(typeof v==='number'?v.toFixed(3):String(v))+'</b></div>';
     }
-    html += '</div>';
+    html += '</div></div>';
   }
   const rCls = reward>0?'green':reward<0?'red':'blue';
   const rStr = (reward>=0?'+':'')+reward.toFixed(4);
@@ -467,14 +590,14 @@ function renderResult(obs, reward) {
   if(obs.metadata && obs.metadata.error) {
     html += '<div style="color:#f85149;font-size:0.82rem;margin-top:8px">⚠️ '+obs.metadata.error+'</div>';
   }
-  if(!html) html = '<p style="color:#8b949e">No data returned for this action.</p>';
+  if(!html) html = '<div class="result-empty">No data returned for this action.</div>';
   document.getElementById('result-content').innerHTML = html;
   document.getElementById('last-result').classList.remove('hidden');
 }
 
 async function sendAction() {
   const btn = document.getElementById('send-btn');
-  btn.disabled = true; btn.textContent = '⏳ Sending...';
+  if (requestInFlight) { showToast('Please wait for the current action to finish.', 'error'); return; }
   try {
     const action = buildAction();
     const resp = await wsSend({type:'step', data: action});
@@ -491,7 +614,12 @@ async function sendAction() {
       const labels = {query_data:'Metric queried ✓',analyze_trend:'Trend analyzed ✓',consult_stakeholder:'Colleague consulted ✓',simulate_counterfactual:'Simulation complete ✓',make_decision:'Decision submitted ✓'};
       showToast(labels[action.action_type] || 'Action sent ✓');
     }
-  } catch(e) { showToast('Error: '+e.message, 'error'); }
+  } catch(e) {
+    setBusyState(false);
+    pendingResolve = null;
+    pendingReject = null;
+    showToast('Error: '+e.message, 'error');
+  }
   btn.disabled = false; btn.textContent = 'Send Action';
 }
 
@@ -509,11 +637,21 @@ function showEndScreen(score, steps) {
     '<div class="result-row"><span class="result-label">Steps taken</span><span class="result-val">'+steps+' / '+maxStep+'</span></div>'+
     '<div class="result-row"><span class="result-label">Total reward</span><span class="result-val '+rCls+'">'+rStr+'</span></div>';
   if(ws) { try { ws.close(); } catch(e){} ws = null; }
+  setBusyState(false);
+  pendingResolve = null;
+  pendingReject = null;
   setScreen(3);
 }
 
-function restartGame() { setScreen(1); }
-function changeDifficulty() { setScreen(1); }
+function restartGame() {
+  setBusyState(false);
+  pendingResolve = null;
+  pendingReject = null;
+  if(ws) { try { ws.close(); } catch(e){} ws = null; }
+  setScreen(1);
+}
+function changeDifficulty() { restartGame(); }
+renderHints();
 </script>
 </body>
 </html>"""
