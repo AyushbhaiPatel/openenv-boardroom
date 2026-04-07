@@ -21,19 +21,34 @@ from uuid import uuid4
 from openenv.core.env_server.interfaces import Environment
 from openenv.core.env_server.types import State
 
-from my_env.models import (
-    BoardroomAction,
-    BoardroomObservation,
-    CompanyState,
-    ScenarioConfig,
-)
-from my_env.server.audit_trail import AuditTrail
-from my_env.server.counterfactual_engine import CounterfactualEngine
-from my_env.server.data_generator import SyntheticDataGenerator
-from my_env.server.explanation_grader import ExplanationGrader
-from my_env.server.noise_injector import NoiseInjector
-from my_env.server.reward_calculator import RewardCalculator
-from my_env.server.stakeholder_simulator import StakeholderSimulator
+try:
+    from my_env.models import (
+        BoardroomAction,
+        BoardroomObservation,
+        CompanyState,
+        ScenarioConfig,
+    )
+    from my_env.server.audit_trail import AuditTrail
+    from my_env.server.counterfactual_engine import CounterfactualEngine
+    from my_env.server.data_generator import SyntheticDataGenerator
+    from my_env.server.explanation_grader import ExplanationGrader
+    from my_env.server.noise_injector import NoiseInjector
+    from my_env.server.reward_calculator import RewardCalculator
+    from my_env.server.stakeholder_simulator import StakeholderSimulator
+except ImportError:  # pragma: no cover — inside Docker PYTHONPATH=/app/env
+    from models import (
+        BoardroomAction,
+        BoardroomObservation,
+        CompanyState,
+        ScenarioConfig,
+    )
+    from audit_trail import AuditTrail
+    from counterfactual_engine import CounterfactualEngine
+    from data_generator import SyntheticDataGenerator
+    from explanation_grader import ExplanationGrader
+    from noise_injector import NoiseInjector
+    from reward_calculator import RewardCalculator
+    from stakeholder_simulator import StakeholderSimulator
 
 # ---------------------------------------------------------------------------
 # Scenario definitions per difficulty tier
@@ -331,7 +346,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
                 explanation_text = (action.parameters.get("explanation") or "").lower()
                 oracle_hit = self._oracle_alignment_hit(decision_text, explanation_text)
             if oracle_hit:
-                final_score = min(1.0, final_score + 0.05)
+                final_score = min(0.99, final_score + 0.05)
 
             metadata["step_reward"] = step_reward
             metadata["final_score"] = final_score

@@ -25,10 +25,10 @@ COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/env /app/env
 
-# PYTHONPATH so server/ and my_env/ imports work
+# PYTHONPATH so my_env/ imports work
 ENV PYTHONPATH="/app/env:$PYTHONPATH"
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["sh", "-c", "cd /app/env && uvicorn server.app:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "uvicorn server.app:app --host 0.0.0.0 --port 8000"]

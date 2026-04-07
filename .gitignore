@@ -55,5 +55,7 @@ Thumbs.db
 *.swo
 *~
 
-# Optional: uncomment if you use local-only VS Code settings
+# Generated wiki files
+.qoder/
+
 # .vscode/

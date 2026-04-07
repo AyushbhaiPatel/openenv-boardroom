@@ -14,7 +14,10 @@ for replay and debugging purposes.
 from datetime import datetime, timezone
 from typing import Any, Dict, List
 
-from my_env.models import AuditEntry, BoardroomAction, BoardroomObservation
+try:
+    from my_env.models import AuditEntry, BoardroomAction, BoardroomObservation
+except ImportError:  # pragma: no cover — inside Docker
+    from models import AuditEntry, BoardroomAction, BoardroomObservation
 
 
 class AuditTrail:

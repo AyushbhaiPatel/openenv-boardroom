@@ -19,8 +19,13 @@ except Exception as e:  # pragma: no cover
     ) from e
 
 from fastapi.responses import HTMLResponse
-from my_env.models import BoardroomAction, BoardroomObservation
-from my_env.server.boardroom_environment import BoardroomEnvironment
+
+try:
+    from my_env.models import BoardroomAction, BoardroomObservation
+    from my_env.server.boardroom_environment import BoardroomEnvironment
+except ImportError:  # pragma: no cover — inside Docker PYTHONPATH=/app/env
+    from models import BoardroomAction, BoardroomObservation
+    from boardroom_environment import BoardroomEnvironment
 
 
 app = create_app(

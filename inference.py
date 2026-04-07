@@ -16,7 +16,7 @@ MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
 LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
 ENV_BASE_URL = (os.getenv("ENV_BASE_URL") or "http://127.0.0.1:8000").rstrip("/")
-HF_ENV_REPO_ID = os.getenv("HF_ENV_REPO_ID", "ayushbhaiPatel/boardroom-env")
+HF_ENV_REPO_ID = os.getenv("HF_ENV_REPO_ID", "")
 BENCHMARK = os.getenv("MY_ENV_V4_BENCHMARK", "boardroom")
 MAX_STEPS = 30
 TEMPERATURE = 0.2
@@ -26,8 +26,8 @@ TASK_CONFIGS: List[Tuple[str, int]] = [
     ("medium", 17),
     ("hard", 29),
 ]
-MIN_SCORE = 0.001
-MAX_SCORE = 0.999
+MIN_SCORE = 0.01
+MAX_SCORE = 0.99
 
 SYSTEM_PROMPT = """You are solving a business operations simulation.
 Return exactly one JSON object with this shape:
@@ -57,7 +57,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: Optional[
 def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
     rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
     print(
-        f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
+        f"[END] success={str(success).lower()} steps={steps} score={score:.2f} rewards={rewards_str}",
         flush=True,
     )
 
@@ -81,17 +81,42 @@ def extract_json(text: str) -> Optional[Dict[str, Any]]:
 
 
 def fallback_action(step: int, task_name: str) -> Dict[str, Any]:
+    # Phase 1: Query key metrics relevant to the task (steps 1-3)
     if step == 1:
         return {"action_type": "query_data", "parameters": {"metric": "revenue"}}
     if step == 2:
         return {"action_type": "query_data", "parameters": {"metric": "churn_rate"}}
     if step == 3:
+        if task_name == "hard":
+            return {"action_type": "query_data", "parameters": {"metric": "monthly_active_users"}}
+        if task_name == "medium":
+            return {"action_type": "query_data", "parameters": {"metric": "ad_spend"}}
         return {"action_type": "query_data", "parameters": {"metric": "monthly_active_users"}}
+    # Phase 2: Analyze trends (step 4)
     if step == 4:
         return {"action_type": "analyze_trend", "parameters": {"metric": "revenue", "quarters": 4}}
+    # Phase 3: Consult stakeholders (steps 5-7)
     if step == 5:
         return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "analyst"}}
     if step == 6:
+        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "ceo"}}
+    if step == 7:
+        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "risk_officer"}}
+    # Phase 4: Additional data gathering for medium/hard (steps 8-9)
+    if step == 8:
+        if task_name == "hard":
+            return {"action_type": "query_data", "parameters": {"metric": "support_load"}}
+        if task_name == "medium":
+            return {"action_type": "query_data", "parameters": {"metric": "cac"}}
+        return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
+    if step == 9:
+        if task_name == "hard":
+            return {"action_type": "query_data", "parameters": {"metric": "release_risk"}}
+        if task_name == "medium":
+            return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
+        return {"action_type": "analyze_trend", "parameters": {"metric": "monthly_active_users", "quarters": 3}}
+    # Phase 5: Counterfactual simulation (step 10)
+    if step == 10:
         if task_name == "hard":
             return {
                 "action_type": "simulate_counterfactual",
@@ -107,33 +132,46 @@ def fallback_action(step: int, task_name: str) -> Dict[str, Any]:
             "action_type": "simulate_counterfactual",
             "parameters": {"decision": "improve retention and pricing", "parameters": {"budget": 50000}},
         }
-    if task_name == "hard":
-        decision = "delay feature x launch"
-        params = {
-            "rollout_percentage": 10,
-            "support_headcount_delta": 4,
-            "rollback_plan": "Gate the release behind a feature flag and rollback within one hour if churn or tickets spike.",
+    # Phase 6: Final decision (step 11+ for easy, later for medium/hard)
+    if task_name == "easy" or step >= 11:
+        if task_name == "hard":
+            decision = "delay feature x launch"
+            params = {
+                "rollout_percentage": 10,
+                "support_headcount_delta": 4,
+                "rollback_plan": "Gate the release behind a feature flag and rollback within one hour if churn or tickets spike.",
+            }
+            explanation = (
+                "Support capacity and release risk are both elevated, while churn is already sensitive. "
+                "This conclusion is uncertain because noisy signals may hide second-order effects, but the analyst and risk officer both support delaying broad launch until support load stabilizes."
+            )
+        elif task_name == "medium":
+            decision = "address churn before scaling"
+            params = {"priority": "retention", "budget": 50000}
+            explanation = (
+                "Revenue, churn, and user metrics indicate the core constraint is retention. "
+                "The trend data shows churn rising over multiple quarters despite ad spend increases. "
+                "This conclusion is uncertain because noisy signals may hide second-order effects. "
+                "The analyst and risk officer support a measured response grounded in the observed data."
+            )
+        else:
+            decision = "address churn before scaling"
+            params = {"priority": "retention"}
+            explanation = (
+                "Revenue, churn, and user metrics indicate the core constraint is retention. "
+                "This conclusion is uncertain because noisy signals may hide second-order effects. "
+                "The analyst and risk officer support a measured response grounded in the observed data."
+            )
+        return {
+            "action_type": "make_decision",
+            "parameters": {
+                "decision": decision,
+                "parameters": params,
+                "explanation": explanation,
+            },
         }
-        explanation = (
-            "Support capacity and release risk are both elevated, while churn is already sensitive. "
-            "This conclusion is uncertain because noisy signals may hide second-order effects, but the analyst and risk officer both support delaying broad launch until support load stabilizes."
-        )
-    else:
-        decision = "address churn before scaling"
-        params = {"priority": "retention"}
-        explanation = (
-            "Revenue, churn, and user metrics indicate the core constraint is retention. "
-            "This conclusion is uncertain because noisy signals may hide second-order effects. "
-            "The analyst and risk officer support a measured response grounded in the observed data."
-        )
-    return {
-        "action_type": "make_decision",
-        "parameters": {
-            "decision": decision,
-            "parameters": params,
-            "explanation": explanation,
-        },
-    }
+    # Extra rounds for medium: more trend analysis
+    return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
 
 
 def build_prompt(task_name: str, step: int, obs: Any) -> str:

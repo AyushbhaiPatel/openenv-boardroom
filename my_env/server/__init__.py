@@ -6,6 +6,9 @@
 
 """OpenBoardroom environment server components."""
 
-from my_env.server.boardroom_environment import BoardroomEnvironment
+try:
+    from my_env.server.boardroom_environment import BoardroomEnvironment
+except ImportError:  # pragma: no cover — inside Docker
+    from boardroom_environment import BoardroomEnvironment
 
 __all__ = ["BoardroomEnvironment"]

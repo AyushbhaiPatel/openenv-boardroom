@@ -255,5 +255,6 @@ class RewardCalculator:
 
         score = sum(weights[k] * normalized.get(k, 0.0) for k in weights)
 
-        # Clamp to [0.0, 1.0] for safety (Property 11).
-        return max(0.0, min(1.0, score))
+        # Clamp to (0.0, 1.0) for safety (Property 11).
+        # Scores must be strictly between 0 and 1 (not inclusive).
+        return max(0.01, min(0.99, score))

@@ -47,7 +47,7 @@ export HF_TOKEN="your_token"
 # Or point at a running server:
 # export ENV_BASE_URL="http://127.0.0.1:8000"
 # Fallback only if you intentionally want OpenEnv to launch from a repo id:
-# export HF_ENV_REPO_ID="your-username/boardroom-env"
+# export HF_ENV_REPO_ID="your-repo/boardroom-env"
 python inference.py
 ```
 
@@ -63,7 +63,7 @@ Required env vars for submission:
 - `API_BASE_URL`: LLM API endpoint
 - `MODEL_NAME`: model identifier used by the OpenAI client
 - `HF_TOKEN`: credential for LLM access
-- `LOCAL_IMAGE_NAME`: local Docker image name if the validator launches the env from Docker
+- `LOCAL_IMAGE_NAME`: *(optional)* local Docker image name if the validator launches the env from Docker
 
 ## Action & Observation Spaces
 
@@ -139,8 +139,8 @@ Latest local run from the project venv produced:
 | Difficulty | Mean Score | Std Dev |
 |---|---:|---:|
 | Easy | 0.9581 | 0.0287 |
-| Medium | 0.7988 | 0.0539 |
-| Hard | 0.8533 | 0.0122 |
+| Medium | 0.7963 | 0.0544 |
+| Hard | 0.8420 | 0.0009 |
 
 ## Project Structure
 
@@ -150,7 +150,7 @@ Latest local run from the project venv produced:
 ├── Dockerfile                # Container build
 └── my_env/                   # OpenEnv environment package
     ├── server/               # Environment server + subsystems
-    ├── tests/                # 41 unit tests
+    ├── tests/                # 62 unit tests
     ├── baseline_agent.py     # Rule-based baseline
     ├── client.py             # BoardroomEnv HTTP client
     └── models.py             # Pydantic Action/Observation models
