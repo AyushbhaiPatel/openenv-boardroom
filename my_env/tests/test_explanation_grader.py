@@ -140,3 +140,7 @@ class TestExplanationGrader:
         assert self.grader._score_oracle_alignment("Sales are slipping quarter over quarter.", revenue_ctx) > 0.25
         assert self.grader._score_oracle_alignment("Customer acquisition cost is rising sharply.", cac_ctx) > 0.25
         assert self.grader._score_oracle_alignment("Customer lifetime value is improving.", ltv_ctx) > 0.25
+
+    def test_alias_matching_uses_whole_terms(self) -> None:
+        revenue_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "revenue"}
+        assert self.grader._score_oracle_alignment("The wholesale channel is stable.", revenue_ctx) == 0.25

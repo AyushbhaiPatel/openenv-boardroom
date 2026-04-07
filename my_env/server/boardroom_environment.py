@@ -649,7 +649,10 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             return False
         if oracle == "do not launch" and negative_launch:
             return True
-        return any(variant and variant in text for variant in oracle_variants)
+        return any(
+            variant and re.search(r"(?<!\w)" + re.escape(variant) + r"(?!\w)", text)
+            for variant in oracle_variants
+        )
 
     def _oracle_alignment_hit(self, decision_text: str, explanation_text: str) -> bool:
         normalized_oracle = self._oracle_answer.lower()
