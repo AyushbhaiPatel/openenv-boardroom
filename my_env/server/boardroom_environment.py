@@ -12,6 +12,7 @@ subsystems: data generation, stakeholder simulation, counterfactual engine,
 reward calculation, explanation grading, noise injection, and audit trail.
 """
 
+import json
 import random
 import re
 from typing import Any, Dict, List, Optional
@@ -464,7 +465,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             len(decision.strip()) >= 10 and non_empty_params
         )
 
-        signature = f"{decision.strip().lower()}::{sorted(params_d.items())}"
+        signature = f"{decision.strip().lower()}::{json.dumps(params_d, sort_keys=True, default=str)}"
         novel = signature not in self._simulation_signatures
         self._simulation_signatures.add(signature)
         reward_context = {"insightful": insightful, "novel": novel}

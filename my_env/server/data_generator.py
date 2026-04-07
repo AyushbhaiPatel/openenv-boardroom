@@ -13,6 +13,7 @@ numpy for full determinism.
 """
 
 import numpy as np
+from typing import Any
 from typing import Dict
 
 try:
@@ -193,7 +194,7 @@ class SyntheticDataGenerator:
             quarter=1,
             history=[],
         )
-        state.history = self._build_history(difficulty, oracle_answer, state)
+        state.history = self._build_history(oracle_answer, state)
         return state
 
     def evolve_state(
@@ -285,12 +286,11 @@ class SyntheticDataGenerator:
 
     def _build_history(
         self,
-        difficulty: str,
         oracle_answer: str,
         state: CompanyState,
-    ) -> list[Dict]:
+    ) -> list[Dict[str, Any]]:
         """Create a short backstory so trend analysis is meaningful from reset()."""
-        history: list[Dict] = []
+        history: list[Dict[str, Any]] = []
         for lookback in range(3, 0, -1):
             factor = 1.0 - 0.05 * lookback
             churn_bump = 0.0
@@ -332,7 +332,7 @@ class SyntheticDataGenerator:
                     "ltv": max(1.0, state.ltv * factor),
                     "support_load": float(np.clip(state.support_load - 0.04 * lookback, 0.05, 1.0)),
                     "release_risk": float(np.clip(state.release_risk - 0.03 * lookback, 0.05, 1.0)),
-                    "quarter": max(1, state.quarter - lookback),
+                    "quarter": 1 - lookback,
                 }
             )
         history.append(state.snapshot())
