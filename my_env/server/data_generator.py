@@ -221,9 +221,11 @@ class SyntheticDataGenerator:
 
         # Ad spend moves with growth intent (good decisions → measured increase).
         base_ad_growth = quality_signal * 0.08
+        base_support_delta = -quality_signal * 0.08
+        base_release_risk_delta = -quality_signal * 0.07
 
         # Add small stochastic noise (seeded).
-        noise = self._rng.normal(0, 0.005, size=6)
+        noise = self._rng.normal(0, 0.005, size=8)
 
         # Apply changes.
         state.revenue *= 1.0 + base_revenue_growth + noise[0]
@@ -234,6 +236,8 @@ class SyntheticDataGenerator:
         state.cac *= 1.0 + base_cac_delta + noise[3]
         state.ltv *= 1.0 + base_ltv_growth + noise[4]
         state.ad_spend *= 1.0 + base_ad_growth + noise[5]
+        state.support_load += base_support_delta + noise[6]
+        state.release_risk += base_release_risk_delta + noise[7]
         state.ad_spend = max(0.0, state.ad_spend)
 
         # Clamp to valid ranges.
@@ -242,6 +246,8 @@ class SyntheticDataGenerator:
         state.cac = max(1.0, state.cac)
         state.ltv = max(1.0, state.ltv)
         state.monthly_active_users = max(1, state.monthly_active_users)
+        state.support_load = float(np.clip(state.support_load, 0.0, 1.0))
+        state.release_risk = float(np.clip(state.release_risk, 0.0, 1.0))
 
         # Advance quarter and record snapshot.
         state.quarter += 1

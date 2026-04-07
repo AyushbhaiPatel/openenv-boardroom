@@ -112,7 +112,10 @@ _ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
     "ad_spend": ("ad spend", "ad-spend", "marketing spend"),
     "monthly_active_users": ("monthly active users", "active users", "mau"),
     "churn_rate": ("churn rate", "churn", "retention"),
-    "do not launch": ("do not launch", "delay", "hold", "postpone"),
+    "cac": ("cac", "customer acquisition cost", "customer-acquisition cost", "acquisition cost"),
+    "ltv": ("ltv", "lifetime value", "customer lifetime value", "customer-lifetime value"),
+    "revenue": ("revenue", "sales", "income"),
+    "do not launch": ("do not launch", "don't launch", "delay", "hold", "postpone"),
 }
 
 _NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -255,7 +258,7 @@ class ExplanationGrader:
         }
         if oracle == "launch" and negative_launch:
             return 0.25
-        if oracle == "do not launch" and any(token in lower for token in ("delay", "hold", "postpone")):
+        if oracle == "do not launch" and negative_launch:
             return 0.9
         if oracle == "launch" and "launch" in lower:
             return 0.9
