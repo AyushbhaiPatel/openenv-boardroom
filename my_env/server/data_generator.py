@@ -22,7 +22,7 @@ except ImportError:
 
 
 # Realistic SaaS metric ranges per difficulty tier.
-# Each tier maps to (min, max) tuples for the six core metrics.
+# Each tier maps to (min, max) tuples for the full eight-metric state vector.
 _DIFFICULTY_RANGES = {
     "easy": {
         "revenue": (500_000, 5_000_000),
@@ -169,7 +169,8 @@ class SyntheticDataGenerator:
             difficulty: One of ``"easy"``, ``"medium"``, ``"hard"``.
 
         Returns:
-            A new :class:`CompanyState` with quarter=1 and an empty history.
+            A new :class:`CompanyState` with quarter=1 and seeded backstory
+            history so trend analysis is meaningful immediately.
 
         Ranges (global bounds across all tiers):
             - revenue:  $50 000 – $5 000 000

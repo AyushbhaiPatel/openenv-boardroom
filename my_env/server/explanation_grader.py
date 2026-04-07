@@ -29,6 +29,8 @@ _DATA_EVIDENCE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"\bcac\b", re.IGNORECASE),
     re.compile(r"\bltv\b", re.IGNORECASE),
     re.compile(r"\bad.spend\b", re.IGNORECASE),
+    re.compile(r"\bsupport(?:[_\s-]?load| capacity)?\b", re.IGNORECASE),
+    re.compile(r"\brelease(?:[_\s-]?risk)?\b", re.IGNORECASE),
     re.compile(r"\bgrowth\b", re.IGNORECASE),
     re.compile(r"\bmetric\b", re.IGNORECASE),
     re.compile(r"\bdata\b", re.IGNORECASE),
@@ -116,9 +118,9 @@ _ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
 _NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
     re.compile(r"\bdo not launch\b", re.IGNORECASE),
     re.compile(r"\bdon't launch\b", re.IGNORECASE),
-    re.compile(r"\bdelay(?:ed|ing)?\s+launch\b", re.IGNORECASE),
-    re.compile(r"\bhold(?:ing)?\s+launch\b", re.IGNORECASE),
-    re.compile(r"\bpostpone(?:d|ment)?\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bdelay(?:ed|ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bhold(?:ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bpostpone(?:d|ment)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
 )
 
 # ---------------------------------------------------------------------------
@@ -253,10 +255,10 @@ class ExplanationGrader:
         }
         if oracle == "launch" and negative_launch:
             return 0.25
-        if any(candidate and candidate in lower for candidate in normalized_candidates):
-            return 1.0
         if oracle == "do not launch" and any(token in lower for token in ("delay", "hold", "postpone")):
             return 0.9
         if oracle == "launch" and "launch" in lower:
             return 0.9
+        if any(candidate and candidate in lower for candidate in normalized_candidates):
+            return 1.0
         return 0.25
