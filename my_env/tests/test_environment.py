@@ -105,6 +105,21 @@ class TestStep:
         ))
         assert len(obs.data_tables["trend"]) >= 4
 
+    def test_easy_query_reward_reflects_information_value(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="easy")
+        oracle_obs = env.step(BoardroomAction(action_type="query_data", parameters={"metric": "churn_rate"}))
+
+        env.reset(seed=42, difficulty="easy")
+        supporting_obs = env.step(BoardroomAction(
+            action_type="query_data", parameters={"metric": "monthly_active_users"}
+        ))
+
+        env.reset(seed=42, difficulty="easy")
+        generic_obs = env.step(BoardroomAction(action_type="query_data", parameters={"metric": "ltv"}))
+
+        assert oracle_obs.reward > supporting_obs.reward > generic_obs.reward
+
     def test_reset_history_has_monotonic_quarters(self):
         env = BoardroomEnvironment()
         env.reset(seed=42, difficulty="medium")

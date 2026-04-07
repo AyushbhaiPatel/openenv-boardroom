@@ -98,12 +98,23 @@ class RewardCalculator:
 
     @staticmethod
     def _reward_query_data(context: Dict[str, Any]) -> float:
-        """query_data: reward relevant discovery, taper repeats."""
+        """query_data: reward information value, taper repeats.
+
+        Oracle/root-cause metrics are most valuable, supporting metrics get
+        medium reward, and generic relevant metrics still receive a small
+        positive signal. Repeats are sharply discounted.
+        """
         if not context.get("relevant", False):
             return 0.0
+        if context.get("oracle_match", False):
+            base = 0.2
+        elif context.get("supporting", False):
+            base = 0.12
+        else:
+            base = 0.06
         if context.get("novel", True):
-            return 0.2
-        return 0.05
+            return base
+        return 0.25 * base
 
     @staticmethod
     def _reward_analyze_trend(context: Dict[str, Any]) -> float:
