@@ -302,6 +302,21 @@ class TestDecisionDifficulty:
         )
         assert positive_score > negative_score
 
+    def test_launch_readiness_does_not_reward_generic_support_language(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="hard")
+        vague = env._score_launch_readiness(
+            "launch feature x",
+            {},
+            "I support the plan and think the release should happen soon.",
+        )
+        specific = env._score_launch_readiness(
+            "launch feature x",
+            {},
+            "Support capacity is stable, ticket backlog is low, and release risk is manageable.",
+        )
+        assert specific > vague
+
     def test_oracle_hit_uses_alias_and_negative_launch_logic(self):
         env = BoardroomEnvironment()
         env.reset(seed=42, difficulty="hard")

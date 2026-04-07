@@ -115,7 +115,16 @@ _ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
     "cac": ("cac", "customer acquisition cost", "customer-acquisition cost", "acquisition cost"),
     "ltv": ("ltv", "lifetime value", "customer lifetime value", "customer-lifetime value"),
     "revenue": ("revenue", "sales", "income"),
-    "do not launch": ("do not launch", "don't launch", "delay", "hold", "postpone"),
+    "do not launch": (
+        "do not launch",
+        "don't launch",
+        "delay launch",
+        "delay the launch",
+        "hold launch",
+        "hold the launch",
+        "postpone launch",
+        "postpone the launch",
+    ),
 }
 
 _NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
@@ -260,8 +269,8 @@ class ExplanationGrader:
             return 0.25
         if oracle == "do not launch" and negative_launch:
             return 0.9
-        if oracle == "launch" and "launch" in lower:
-            return 0.9
         if any(candidate and candidate in lower for candidate in normalized_candidates):
             return 1.0
+        if oracle == "launch" and "launch" in lower:
+            return 0.9
         return 0.25

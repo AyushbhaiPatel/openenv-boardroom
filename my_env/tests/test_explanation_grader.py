@@ -109,6 +109,20 @@ class TestExplanationGrader:
         )
         assert score == 0.9
 
+    def test_generic_delay_language_does_not_count_as_do_not_launch_alignment(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "do not launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should delay the pricing change until legal signs off.", ctx
+        )
+        assert score == 0.25
+
+    def test_launch_can_reach_full_oracle_credit(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should launch Feature X once support capacity is ready.", ctx
+        )
+        assert score == 1.0
+
     def test_hard_metric_vocabulary_counts_as_data_evidence(self) -> None:
         without = "We should wait and gather more input."
         with_hard_metrics = "Support load is elevated and release risk remains high."
