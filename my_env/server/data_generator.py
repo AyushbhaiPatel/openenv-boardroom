@@ -61,7 +61,7 @@ _EASY_PROFILES: Dict[str, Dict[str, float]] = {
     "churn_rate": {
         "revenue": 1_450_000,
         "monthly_active_users": 182_000,
-        "churn_rate": 0.108,
+        "churn_rate": 0.058,
         "ad_spend": 86_000,
         "cac": 78,
         "ltv": 2_350,
@@ -73,7 +73,7 @@ _EASY_PROFILES: Dict[str, Dict[str, float]] = {
         "monthly_active_users": 138_000,
         "churn_rate": 0.051,
         "ad_spend": 172_000,
-        "cac": 218,
+        "cac": 142,
         "ltv": 1_150,
         "support_load": 0.47,
         "release_risk": 0.30,
@@ -94,7 +94,7 @@ _MEDIUM_PROFILES: Dict[str, Dict[str, float]] = {
     "churn_rate": {
         "revenue": 820_000,
         "monthly_active_users": 118_000,
-        "churn_rate": 0.142,
+        "churn_rate": 0.094,
         "ad_spend": 91_000,
         "cac": 104,
         "ltv": 1_160,
