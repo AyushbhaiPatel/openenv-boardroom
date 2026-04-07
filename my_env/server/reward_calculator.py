@@ -98,31 +98,37 @@ class RewardCalculator:
 
     @staticmethod
     def _reward_query_data(context: Dict[str, Any]) -> float:
-        """query_data: +0.2 when the queried metric is relevant."""
-        if context.get("relevant", False):
+        """query_data: reward relevant discovery, taper repeats."""
+        if not context.get("relevant", False):
+            return 0.0
+        if context.get("novel", True):
             return 0.2
-        return 0.0
+        return 0.05
 
     @staticmethod
     def _reward_analyze_trend(context: Dict[str, Any]) -> float:
-        """analyze_trend: +0.25 when noise is correctly handled."""
-        if context.get("noise_handled", False):
+        """analyze_trend: reward sufficiently deep and targeted trend work."""
+        if context.get("noise_handled", False) and context.get("relevant", True):
             return 0.25
+        if context.get("noise_handled", False):
+            return 0.12
         return 0.0
 
     @staticmethod
     def _reward_simulate_counterfactual(context: Dict[str, Any]) -> float:
-        """simulate_counterfactual: +0.3 when the simulation is insightful."""
-        if context.get("insightful", False):
+        """simulate_counterfactual: reward insightful and non-redundant simulations."""
+        if context.get("insightful", False) and context.get("novel", True):
             return 0.3
+        if context.get("insightful", False):
+            return 0.12
         return 0.0
 
     @staticmethod
     def _reward_consult_stakeholder(context: Dict[str, Any]) -> float:
         """consult_stakeholder: +0.15 when stakeholder pressure is navigated."""
         nav = context.get("navigation_score", 0.0)
-        # Scale the base reward by navigation effectiveness.
-        return 0.15 * float(nav)
+        novelty = 1.0 if context.get("novel", True) else 0.4
+        return 0.15 * float(nav) * novelty
 
     @staticmethod
     def _reward_make_decision(context: Dict[str, Any]) -> float:

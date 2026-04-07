@@ -92,21 +92,46 @@ def fallback_action(step: int, task_name: str) -> Dict[str, Any]:
     if step == 5:
         return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "analyst"}}
     if step == 6:
+        if task_name == "hard":
+            return {
+                "action_type": "simulate_counterfactual",
+                "parameters": {
+                    "decision": "phased launch with added support coverage",
+                    "parameters": {
+                        "rollout_percentage": 20,
+                        "support_headcount_delta": 4,
+                    },
+                },
+            }
         return {
             "action_type": "simulate_counterfactual",
             "parameters": {"decision": "improve retention and pricing", "parameters": {"budget": 50000}},
         }
-    decision = "launch cautiously" if task_name == "hard" else "address churn before scaling"
+    if task_name == "hard":
+        decision = "delay feature x launch"
+        params = {
+            "rollout_percentage": 10,
+            "support_headcount_delta": 4,
+            "rollback_plan": "Gate the release behind a feature flag and rollback within one hour if churn or tickets spike.",
+        }
+        explanation = (
+            "Support capacity and release risk are both elevated, while churn is already sensitive. "
+            "This conclusion is uncertain because noisy signals may hide second-order effects, but the analyst and risk officer both support delaying broad launch until support load stabilizes."
+        )
+    else:
+        decision = "address churn before scaling"
+        params = {"priority": "retention"}
+        explanation = (
+            "Revenue, churn, and user metrics indicate the core constraint is retention. "
+            "This conclusion is uncertain because noisy signals may hide second-order effects. "
+            "The analyst and risk officer support a measured response grounded in the observed data."
+        )
     return {
         "action_type": "make_decision",
         "parameters": {
             "decision": decision,
-            "parameters": {"priority": "retention"},
-            "explanation": (
-                "Revenue, churn, and user metrics indicate the core constraint is retention. "
-                "This conclusion is uncertain because noisy signals may hide second-order effects. "
-                "The analyst and risk officer support a measured response grounded in the observed data."
-            ),
+            "parameters": params,
+            "explanation": explanation,
         },
     }
 

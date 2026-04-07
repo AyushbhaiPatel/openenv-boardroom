@@ -31,6 +31,8 @@ class TestReset:
         assert obs.step_count == 0
         assert obs.done is False
         assert obs.data_tables  # non-empty initial snapshot
+        assert "support_load" in obs.data_tables
+        assert "release_risk" in obs.data_tables
 
     def test_each_difficulty_tier(self):
         env = BoardroomEnvironment()
@@ -38,6 +40,12 @@ class TestReset:
             obs = env.reset(seed=0, difficulty=diff)
             assert obs.metadata["max_steps"] == expected_steps
             assert obs.metadata["difficulty"] == diff
+
+    def test_reset_includes_scenario_brief(self):
+        env = BoardroomEnvironment()
+        obs = env.reset(seed=0, difficulty="hard")
+        assert "brief" in obs.metadata
+        assert "launch" in obs.metadata["brief"].lower()
 
 
 class TestStep:
@@ -86,6 +94,15 @@ class TestStep:
         assert obs.done is True
         assert "final_score" in obs.metadata
         assert 0.0 <= obs.metadata["final_score"] <= 1.0
+
+    def test_trend_analysis_has_history_from_reset(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="medium")
+        obs = env.step(BoardroomAction(
+            action_type="analyze_trend",
+            parameters={"metric": "revenue", "quarters": 4},
+        ))
+        assert len(obs.data_tables["trend"]) >= 4
 
 
 class TestErrorHandling:
@@ -153,3 +170,78 @@ class TestMaxStepsTermination:
             ))
         assert obs.done is True
         assert obs.step_count == 10
+
+
+class TestDecisionDifficulty:
+    def test_hard_task_penalizes_shallow_immediate_decision(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="hard")
+        obs = env.step(BoardroomAction(
+            action_type="make_decision",
+            parameters={
+                "decision": "launch feature x",
+                "parameters": {},
+                "explanation": "Launch now because growth matters.",
+            },
+        ))
+        assert obs.done is True
+        assert obs.metadata["final_score"] < 0.45
+
+    def test_hard_task_rewards_structured_launch_plan_fields(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="hard")
+        for metric in ["churn_rate", "support_load", "release_risk"]:
+            env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
+        obs = env.step(BoardroomAction(
+            action_type="make_decision",
+            parameters={
+                "decision": "delay feature x launch",
+                "parameters": {
+                    "rollout_percentage": 10,
+                    "support_headcount_delta": 4,
+                    "rollback_plan": "Hold launch behind a feature flag and rollback within one hour if churn spikes.",
+                },
+                "explanation": (
+                    "Release risk and support capacity are both elevated, while churn is already rising. "
+                    "The risk officer and analyst feedback suggest delaying broad launch until support capacity improves."
+                ),
+            },
+        ))
+        assert obs.done is True
+        assert obs.metadata["final_score"] > 0.25
+
+    def test_structured_launch_plan_scores_above_generic_launch_prose(self):
+        generic_env = BoardroomEnvironment()
+        generic_env.reset(seed=42, difficulty="hard")
+        for metric in ["churn_rate", "support_load", "release_risk"]:
+            generic_env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
+        generic = generic_env.step(BoardroomAction(
+            action_type="make_decision",
+            parameters={
+                "decision": "launch feature x",
+                "parameters": {},
+                "explanation": "We should launch because growth matters and the market is moving quickly.",
+            },
+        ))
+
+        structured_env = BoardroomEnvironment()
+        structured_env.reset(seed=42, difficulty="hard")
+        for metric in ["churn_rate", "support_load", "release_risk"]:
+            structured_env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
+        structured = structured_env.step(BoardroomAction(
+            action_type="make_decision",
+            parameters={
+                "decision": "delay feature x launch",
+                "parameters": {
+                    "rollout_percentage": 10,
+                    "support_headcount_delta": 4,
+                    "rollback_plan": "Hold launch behind a feature flag and rollback within one hour if churn spikes.",
+                },
+                "explanation": (
+                    "Support capacity and release risk are elevated, while churn is already rising. "
+                    "The analyst and risk officer feedback suggest delaying broad launch until support capacity improves."
+                ),
+            },
+        ))
+
+        assert structured.metadata["final_score"] > generic.metadata["final_score"]

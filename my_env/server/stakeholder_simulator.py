@@ -216,7 +216,11 @@ class StakeholderSimulator:
                 except (KeyError, IndexError):
                     sentences.append(raw)
 
-        return " ".join(sentences[:total_picks])
+        message = " ".join(sentences[:total_picks])
+        oracle_hint = self._objective_hint(stakeholder, context)
+        if oracle_hint:
+            message = f"{message} {oracle_hint}"
+        return message
 
     def compute_navigation_score(
         self, consultation_history: List[Dict]
@@ -296,6 +300,25 @@ class StakeholderSimulator:
             piece = f"{key}={round(float(val), 6)}".encode("utf-8")
             acc ^= _stable_u64_bytes(piece)
         return acc % (2**63)
+
+    @staticmethod
+    def _objective_hint(stakeholder: str, context: Dict) -> str:
+        objective = (context or {}).get("objective", "").lower()
+        oracle = (context or {}).get("oracle_answer", "").lower()
+
+        if "revenue drop" in objective:
+            if stakeholder == "analyst" and oracle == "ad_spend":
+                return "Paid acquisition efficiency has slipped for three quarters in a row."
+            if stakeholder == "risk_officer" and oracle == "churn_rate":
+                return "Retention risk is compounding faster than topline dashboards suggest."
+        if "launch feature" in objective:
+            if stakeholder == "ceo" and oracle == "launch":
+                return "Competitors are moving quickly, so delaying the release carries strategic cost."
+            if stakeholder == "risk_officer" and oracle == "do not launch":
+                return "The release would stress support capacity and increase churn exposure."
+            if stakeholder == "analyst":
+                return "We should compare upside against unit economics and support capacity, not growth alone."
+        return ""
 
 
 def _stable_u64(s: str) -> int:

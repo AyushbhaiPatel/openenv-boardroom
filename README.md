@@ -73,11 +73,27 @@ Each step the agent submits one JSON action:
 
 | Action | Parameters | Description |
 |---|---|---|
-| `query_data` | `{"metric": "<name>"}` | Query a KPI (revenue, monthly_active_users, churn_rate, ad_spend, cac, ltv) |
+| `query_data` | `{"metric": "<name>"}` | Query a KPI (revenue, monthly_active_users, churn_rate, ad_spend, cac, ltv, support_load, release_risk) |
 | `analyze_trend` | `{"metric": "<name>", "quarters": int}` | Get trend data for a metric over N quarters |
 | `consult_stakeholder` | `{"stakeholder": "<name>"}` | Get feedback from analyst, ceo, or risk_officer |
 | `simulate_counterfactual` | `{"decision": "<desc>", "parameters": {}}` | Run a PyTorch what-if simulation |
 | `make_decision` | `{"decision": "<desc>", "parameters": {}, "explanation": "<text>"}` | Submit final decision and end the episode |
+
+For the hard launch-governance task, `make_decision.parameters` supports structured rollout planning fields:
+
+```json
+{
+  "decision": "delay feature x launch",
+  "parameters": {
+    "rollout_percentage": 10,
+    "support_headcount_delta": 4,
+    "rollback_plan": "Gate the release behind a feature flag and rollback within one hour if churn spikes."
+  },
+  "explanation": "Support capacity and release risk are elevated, so broad launch should wait."
+}
+```
+
+The hard-task grader gives more credit when the agent commits to an operational plan instead of generic launch prose.
 
 ### Observations
 
@@ -102,9 +118,13 @@ The benchmark exposes 3 deterministic tasks, each with a programmatic grader tha
 |---|---|---|
 | Find the Growth Bottleneck | Easy | Relevant KPI queries, trend inspection, decision quality, oracle match |
 | Diagnose the Revenue Drop | Medium | Noise-aware trend analysis, stakeholder diversity, explanation quality, oracle match |
-| Should We Launch Feature X? | Hard | Counterfactual quality, stakeholder navigation, launch reasoning, oracle match |
+| Should We Launch Feature X? | Hard | Counterfactual quality, stakeholder navigation, launch reasoning, structured rollout plan, oracle match |
 
 Grading is deterministic for a fixed seed. Final scoring combines dense step rewards from [reward_calculator.py](/Users/ayush/Desktop/openenv-project/my_env/server/reward_calculator.py) and explanation quality from [explanation_grader.py](/Users/ayush/Desktop/openenv-project/my_env/server/explanation_grader.py). On episode completion, the environment emits `final_score`, `oracle_answer`, and `oracle_hit` in observation metadata for auditability.
+
+Illustrative hard-task grading behavior:
+- Generic response: `"launch feature x"` with no rollout plan and no rollback path scores poorly.
+- Better response: `"delay feature x launch"` plus `rollout_percentage`, `support_headcount_delta`, and `rollback_plan` scores higher when it cites support load, release risk, and churn tradeoffs.
 
 ## Baseline Reproducibility
 
@@ -118,9 +138,9 @@ Latest local run from the project venv produced:
 
 | Difficulty | Mean Score | Std Dev |
 |---|---:|---:|
-| Easy | 0.7504 | 0.0235 |
-| Medium | 0.6145 | 0.0226 |
-| Hard | 0.6794 | 0.0000 |
+| Easy | 0.9581 | 0.0287 |
+| Medium | 0.7988 | 0.0539 |
+| Hard | 0.8533 | 0.0122 |
 
 ## Project Structure
 
