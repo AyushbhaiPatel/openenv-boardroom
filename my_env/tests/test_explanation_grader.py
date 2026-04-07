@@ -85,3 +85,62 @@ class TestExplanationGrader:
         without = "We should cut costs."
         with_stake = "The analyst and CEO have different viewpoints on cutting costs."
         assert self.grader.grade(with_stake, self.ctx) > self.grader.grade(without, self.ctx)
+
+    def test_oracle_aliases_count_as_alignment(self) -> None:
+        ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "monthly_active_users"}
+        alias_score = self.grader.grade("Monthly active users are falling and MAU is weak.", ctx)
+        miss_score = self.grader.grade("Revenue is fine and costs are stable.", ctx)
+        assert alias_score > miss_score
+
+    def test_launch_oracle_does_not_match_negative_phrase(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "launch"}
+        negative_score = self.grader._score_oracle_alignment(
+            "We should do not launch Feature X until risk drops.", ctx
+        )
+        positive_score = self.grader._score_oracle_alignment(
+            "We should launch Feature X with support safeguards.", ctx
+        )
+        assert positive_score > negative_score
+
+    def test_negative_launch_aliases_get_partial_credit(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "do not launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should delay feature x launch until support capacity improves.", ctx
+        )
+        assert score == 0.9
+
+    def test_generic_delay_language_does_not_count_as_do_not_launch_alignment(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "do not launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should delay the pricing change until legal signs off.", ctx
+        )
+        assert score == 0.25
+
+    def test_launch_can_reach_full_oracle_credit(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "launch"}
+        score = self.grader._score_oracle_alignment(
+            "We should launch Feature X once support capacity is ready.", ctx
+        )
+        assert score == 1.0
+
+    def test_hard_metric_vocabulary_counts_as_data_evidence(self) -> None:
+        without = "We should wait and gather more input."
+        with_hard_metrics = "Support load is elevated and release risk remains high."
+        assert self.grader.grade(with_hard_metrics, self.ctx) > self.grader.grade(without, self.ctx)
+
+    def test_generic_support_or_release_language_does_not_count_as_metric_evidence(self) -> None:
+        vague = self.grader.grade("I support the plan and we should release next week.", self.ctx)
+        precise = self.grader.grade("Support load is high and release risk remains elevated.", self.ctx)
+        assert precise > vague
+
+    def test_common_business_aliases_count_for_oracle_alignment(self) -> None:
+        revenue_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "revenue"}
+        cac_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "cac"}
+        ltv_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "ltv"}
+        assert self.grader._score_oracle_alignment("Sales are slipping quarter over quarter.", revenue_ctx) > 0.25
+        assert self.grader._score_oracle_alignment("Customer acquisition cost is rising sharply.", cac_ctx) > 0.25
+        assert self.grader._score_oracle_alignment("Customer lifetime value is improving.", ltv_ctx) > 0.25
+
+    def test_alias_matching_uses_whole_terms(self) -> None:
+        revenue_ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "revenue"}
+        assert self.grader._score_oracle_alignment("The wholesale channel is stable.", revenue_ctx) == 0.25

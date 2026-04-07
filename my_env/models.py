@@ -85,6 +85,8 @@ class CompanyState:
     ad_spend: float = 0.0
     cac: float = 0.0
     ltv: float = 0.0
+    support_load: float = 0.0
+    release_risk: float = 0.0
     quarter: int = 1
     history: List[Dict] = field(default_factory=list)
 
@@ -97,6 +99,8 @@ class CompanyState:
             "ad_spend": self.ad_spend,
             "cac": self.cac,
             "ltv": self.ltv,
+            "support_load": self.support_load,
+            "release_risk": self.release_risk,
             "quarter": self.quarter,
         }
 
@@ -109,6 +113,8 @@ class CompanyState:
             self.ad_spend / 1e5,
             self.cac / 100,
             self.ltv / 1000,
+            self.support_load,
+            self.release_risk,
         ]
 
 

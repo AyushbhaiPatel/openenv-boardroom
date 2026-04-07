@@ -29,6 +29,8 @@ _DATA_EVIDENCE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"\bcac\b", re.IGNORECASE),
     re.compile(r"\bltv\b", re.IGNORECASE),
     re.compile(r"\bad.spend\b", re.IGNORECASE),
+    re.compile(r"\bsupport(?:[_\s-]?load| capacity)\b", re.IGNORECASE),
+    re.compile(r"\brelease(?:[_\s-]?risk)\b", re.IGNORECASE),
     re.compile(r"\bgrowth\b", re.IGNORECASE),
     re.compile(r"\bmetric\b", re.IGNORECASE),
     re.compile(r"\bdata\b", re.IGNORECASE),
@@ -106,6 +108,33 @@ _STAKEHOLDER_KEYWORDS: list[str] = [
     "feedback",
 ]
 
+_ORACLE_ALIASES: dict[str, tuple[str, ...]] = {
+    "ad_spend": ("ad spend", "ad-spend", "marketing spend"),
+    "monthly_active_users": ("monthly active users", "active users", "mau"),
+    "churn_rate": ("churn rate", "churn", "retention"),
+    "cac": ("cac", "customer acquisition cost", "customer-acquisition cost", "acquisition cost"),
+    "ltv": ("ltv", "lifetime value", "customer lifetime value", "customer-lifetime value"),
+    "revenue": ("revenue", "sales", "income"),
+    "do not launch": (
+        "do not launch",
+        "don't launch",
+        "delay launch",
+        "delay the launch",
+        "hold launch",
+        "hold the launch",
+        "postpone launch",
+        "postpone the launch",
+    ),
+}
+
+_NEGATIVE_LAUNCH_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(r"\bdo not launch\b", re.IGNORECASE),
+    re.compile(r"\bdon't launch\b", re.IGNORECASE),
+    re.compile(r"\bdelay(?:ed|ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bhold(?:ing)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+    re.compile(r"\bpostpone(?:d|ment)?(?:\s+\w+){0,3}\s+launch\b", re.IGNORECASE),
+)
+
 # ---------------------------------------------------------------------------
 # Component weights (must sum to 1.0)
 # ---------------------------------------------------------------------------
@@ -157,6 +186,7 @@ class ExplanationGrader:
         scenario_bonus = self._score_scenario_alignment(
             explanation, scenario_context
         )
+        oracle_bonus = self._score_oracle_alignment(explanation, scenario_context)
 
         combined = (
             _WEIGHT_DATA_EVIDENCE * data_score
@@ -165,6 +195,7 @@ class ExplanationGrader:
         )
         # Up to +0.15 from objective-aligned phrasing (then re-normalize into [0,1])
         combined = combined * 0.85 + 0.15 * scenario_bonus
+        combined = combined * 0.9 + 0.1 * oracle_bonus
 
         return max(0.0, min(1.0, combined))
 
@@ -219,3 +250,29 @@ class ExplanationGrader:
             hits = sum(1 for p in patterns if p.search(text))
             best = max(best, min(hits / float(len(patterns)), 1.0))
         return best if best > 0 else 0.3
+
+    @staticmethod
+    def _score_oracle_alignment(text: str, scenario_context: Dict[str, Any]) -> float:
+        oracle = ((scenario_context or {}).get("oracle_answer") or "").lower()
+        if not oracle:
+            return 0.5
+        lower = text.lower()
+        negative_launch = any(pattern.search(lower) for pattern in _NEGATIVE_LAUNCH_PATTERNS)
+        aliases = _ORACLE_ALIASES.get(oracle, ())
+        normalized_candidates = {
+            oracle,
+            oracle.replace("_", " "),
+            oracle.replace("_", "-"),
+            *aliases,
+        }
+        def has_candidate(candidate: str) -> bool:
+            return bool(re.search(r"(?<!\w)" + re.escape(candidate) + r"(?!\w)", lower))
+        if oracle == "launch" and negative_launch:
+            return 0.25
+        if oracle == "do not launch" and negative_launch:
+            return 0.9
+        if any(candidate and has_candidate(candidate) for candidate in normalized_candidates):
+            return 1.0
+        if oracle == "launch" and "launch" in lower:
+            return 0.9
+        return 0.25
