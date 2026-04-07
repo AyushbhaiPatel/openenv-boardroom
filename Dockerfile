@@ -8,7 +8,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . /app/env
-WORKDIR /app/env/my_env
+WORKDIR /app/env
 
 # Install the project and all deps (CPU-only torch for smaller image)
 RUN pip install --no-cache-dir \
@@ -26,9 +26,9 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/env /app/env
 
 # PYTHONPATH so server/ and my_env/ imports work
-ENV PYTHONPATH="/app/env/my_env:/app/env:$PYTHONPATH"
+ENV PYTHONPATH="/app/env:$PYTHONPATH"
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-CMD ["sh", "-c", "cd /app/env/my_env && uvicorn server.app:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "cd /app/env && uvicorn server.app:app --host 0.0.0.0 --port 8000"]

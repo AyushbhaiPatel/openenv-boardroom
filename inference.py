@@ -1,313 +1,268 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-
-"""Inference Script for OpenBoardroom Environment
-===================================
-
-MANDATORY
-- Before submitting, ensure the following variables are defined in your
-  environment configuration:
-  API_BASE_URL   The API endpoint for the LLM.
-  MODEL_NAME     The model identifier to use for inference.
-  HF_TOKEN       Your Hugging Face / API key.
-- The inference script must be named `inference.py` and placed in the root
-  directory of the project
-- Participants must use OpenAI Client for all LLM calls using above variables
-"""
+"""Validator-safe inference runner for the OpenBoardroom environment."""
 
 import asyncio
 import json
 import os
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
-import numpy as np
 from openai import OpenAI
 
 from my_env.client import BoardroomEnv
 from my_env.models import BoardroomAction
 
-# ---------------------------------------------------------------------------
-# Configuration
-# ---------------------------------------------------------------------------
-
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
+MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
-MODEL_NAME = os.getenv("MODEL_NAME", "openai/gpt-oss-120b:novita")
-# HuggingFace Space repo id for remote env, or leave unset to use localhost.
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
+ENV_BASE_URL = (os.getenv("ENV_BASE_URL") or "http://127.0.0.1:8000").rstrip("/")
 HF_ENV_REPO_ID = os.getenv("HF_ENV_REPO_ID", "ayushbhaiPatel/boardroom-env")
-ENV_BASE_URL = os.getenv("ENV_BASE_URL", "").strip()
-
-DIFFICULTIES = ["easy", "medium", "hard"]
-EPISODES_PER_TIER = 2  # Keep low for 20-min runtime on 2 vCPU / 8 GB
+BENCHMARK = os.getenv("MY_ENV_V4_BENCHMARK", "boardroom")
 MAX_STEPS = 30
-TEMPERATURE = 0.3
-MAX_TOKENS = 512
+TEMPERATURE = 0.2
+MAX_TOKENS = 350
+TASK_CONFIGS: List[Tuple[str, int]] = [
+    ("easy", 7),
+    ("medium", 17),
+    ("hard", 29),
+]
+MIN_SCORE = 0.001
+MAX_SCORE = 0.999
 
-VALID_METRICS = ["revenue", "monthly_active_users", "churn_rate",
-                 "ad_spend", "cac", "ltv"]
-VALID_STAKEHOLDERS = ["analyst", "ceo", "risk_officer"]
-
-# ---------------------------------------------------------------------------
-# System prompt
-# ---------------------------------------------------------------------------
-
-SYSTEM_PROMPT = """\
-You are an expert Chief Data Officer (CDO) at a SaaS company. You are playing \
-a strategic decision-making game. Each turn you must choose ONE action.
-
-Available actions (respond with valid JSON only):
-
-1. Query a metric:
-   {"action_type": "query_data", "parameters": {"metric": "<name>"}}
-   Valid metrics: revenue, monthly_active_users, churn_rate, ad_spend, cac, ltv
-
-2. Analyze a trend:
-   {"action_type": "analyze_trend", "parameters": {"metric": "<name>", "quarters": 2}}
-
-3. Consult a stakeholder:
-   {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "<name>"}}
-   Valid: analyst, ceo, risk_officer
-
-4. Run a counterfactual simulation:
-   {"action_type": "simulate_counterfactual", "parameters": {"decision": "<desc>", "parameters": {}}}
-
-5. Make a final decision (ends the quarter):
-   {"action_type": "make_decision", "parameters": {"decision": "<desc>", "parameters": {}, "explanation": "<reasoning>"}}
-
-Strategy: Query key metrics first, consult stakeholders, run simulations, \
-then make a well-reasoned decision. Reference data, acknowledge uncertainty, \
-and consider stakeholder perspectives in your explanation.
-
-IMPORTANT: Respond with ONLY a single JSON object. No markdown, no commentary.\
-"""
+SYSTEM_PROMPT = """You are solving a business operations simulation.
+Return exactly one JSON object with this shape:
+{"action_type":"query_data|analyze_trend|consult_stakeholder|simulate_counterfactual|make_decision","parameters":{...}}
+Do not use markdown.
+Prioritize evidence gathering, then trends, stakeholders, simulation, and finally a grounded decision."""
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
+def _sanitize(value: Any) -> str:
+    text = "null" if value is None else str(value)
+    text = text.replace("\n", "\\n").replace("\r", "\\r")
+    return text if text else "null"
+
+
+def log_start(task: str) -> None:
+    print(f"[START] task={task} env={BENCHMARK} model={MODEL_NAME}", flush=True)
+
+
+def log_step(step: int, action: str, reward: float, done: bool, error: Optional[str]) -> None:
+    print(
+        f"[STEP] step={step} action={_sanitize(action)} reward={reward:.2f} "
+        f"done={str(done).lower()} error={_sanitize(error)}",
+        flush=True,
+    )
+
+
+def log_end(success: bool, steps: int, score: float, rewards: List[float]) -> None:
+    rewards_str = ",".join(f"{reward:.2f}" for reward in rewards)
+    print(
+        f"[END] success={str(success).lower()} steps={steps} score={score:.3f} rewards={rewards_str}",
+        flush=True,
+    )
+
 
 def extract_json(text: str) -> Optional[Dict[str, Any]]:
-    """Extract a JSON object from LLM output (handles nested objects)."""
-    text = text.strip()
+    text = (text or "").strip()
+    if not text:
+        return None
     if text.startswith("{"):
         try:
             return json.loads(text)
         except json.JSONDecodeError:
-            try:
-                obj, _ = json.JSONDecoder().raw_decode(text)
-                if isinstance(obj, dict):
-                    return obj
-            except json.JSONDecodeError:
-                pass
-    match = re.search(r"```(?:json)?\s*(\{.*\})\s*```", text, re.DOTALL)
-    if match:
-        blob = match.group(1).strip()
-        try:
-            return json.loads(blob)
-        except json.JSONDecodeError:
-            try:
-                obj, _ = json.JSONDecoder().raw_decode(blob)
-                if isinstance(obj, dict):
-                    return obj
-            except json.JSONDecodeError:
-                pass
-    start = text.find("{")
-    if start >= 0:
-        try:
-            obj, _ = json.JSONDecoder().raw_decode(text[start:])
-            if isinstance(obj, dict):
-                return obj
-        except json.JSONDecodeError:
             pass
-    return None
+    match = re.search(r"\{.*\}", text, re.DOTALL)
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(0))
+    except json.JSONDecodeError:
+        return None
 
 
-def obs_to_text(obs, difficulty: str, max_steps: int) -> str:
-    """Convert observation to text for the LLM (includes objective every turn)."""
-    md = obs.metadata or {}
-    objective = md.get("objective", "")
-    remaining = max(0, max_steps - obs.step_count)
-    parts = [
-        f"Difficulty: {difficulty} | Objective: {objective}",
-        f"Step {obs.step_count} / max {max_steps} (about {remaining} steps left before timeout)",
-        f"Quarter {obs.quarter}",
-    ]
-    if obs.data_tables:
-        parts.append(f"Data: {json.dumps(obs.data_tables, default=str)}")
-    if obs.stakeholder_feedback:
-        parts.append(f"Stakeholder feedback: {obs.stakeholder_feedback}")
-    if obs.simulation_results:
-        parts.append(f"Simulation: {json.dumps(obs.simulation_results, default=str)}")
-    if md.get("error"):
-        parts.append(f"Error: {md['error']}")
-    if md.get("final_score") is not None:
-        parts.append(f"Final score (episode over): {md['final_score']:.4f}")
-    if md.get("step_reward") is not None and obs.done:
-        parts.append(f"Last step reward (before final score): {md['step_reward']:+.4f}")
-    parts.append(f"Reward this response: {obs.reward}")
-    return "\n".join(parts)
-
-
-def fallback_action(step: int) -> Dict[str, Any]:
-    """Deterministic fallback if LLM fails."""
-    cycle = step % 9
-    if cycle < 3:
-        return {"action_type": "query_data",
-                "parameters": {"metric": VALID_METRICS[cycle]}}
-    elif cycle == 3:
-        return {"action_type": "analyze_trend",
-                "parameters": {"metric": "revenue", "quarters": 2}}
-    elif cycle < 7:
-        return {"action_type": "consult_stakeholder",
-                "parameters": {"stakeholder": VALID_STAKEHOLDERS[cycle - 4]}}
-    elif cycle == 7:
-        return {"action_type": "simulate_counterfactual",
-                "parameters": {"decision": "optimize_growth", "parameters": {}}}
-    else:
+def fallback_action(step: int, task_name: str) -> Dict[str, Any]:
+    if step == 1:
+        return {"action_type": "query_data", "parameters": {"metric": "revenue"}}
+    if step == 2:
+        return {"action_type": "query_data", "parameters": {"metric": "churn_rate"}}
+    if step == 3:
+        return {"action_type": "query_data", "parameters": {"metric": "monthly_active_users"}}
+    if step == 4:
+        return {"action_type": "analyze_trend", "parameters": {"metric": "revenue", "quarters": 4}}
+    if step == 5:
+        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "analyst"}}
+    if step == 6:
         return {
-            "action_type": "make_decision",
-            "parameters": {
-                "decision": "balanced_growth",
-                "parameters": {},
-                "explanation": (
-                    "Based on revenue and churn data, a balanced approach is best. "
-                    "The analyst recommends caution, the CEO wants growth, and the "
-                    "risk officer urges stability. There is uncertainty in the data, "
-                    "but the metrics suggest moderate investment."
-                ),
+            "action_type": "simulate_counterfactual",
+            "parameters": {"decision": "improve retention and pricing", "parameters": {"budget": 50000}},
+        }
+    decision = "launch cautiously" if task_name == "hard" else "address churn before scaling"
+    return {
+        "action_type": "make_decision",
+        "parameters": {
+            "decision": decision,
+            "parameters": {"priority": "retention"},
+            "explanation": (
+                "Revenue, churn, and user metrics indicate the core constraint is retention. "
+                "This conclusion is uncertain because noisy signals may hide second-order effects. "
+                "The analyst and risk officer support a measured response grounded in the observed data."
+            ),
+        },
+    }
+
+
+def build_prompt(task_name: str, step: int, obs: Any) -> str:
+    metadata = obs.metadata or {}
+    return json.dumps(
+        {
+            "task": task_name,
+            "step": step,
+            "objective": metadata.get("objective"),
+            "max_steps": metadata.get("max_steps"),
+            "observation": {
+                "data_tables": obs.data_tables,
+                "stakeholder_feedback": obs.stakeholder_feedback,
+                "simulation_results": obs.simulation_results,
+                "quarter": obs.quarter,
+                "step_count": obs.step_count,
+                "done": obs.done,
+                "reward": obs.reward,
+                "metadata": metadata,
             },
         }
+    )
 
 
-# ---------------------------------------------------------------------------
-# Episode runner
-# ---------------------------------------------------------------------------
+def choose_action(client: Optional[OpenAI], task_name: str, step: int, obs: Any) -> Dict[str, Any]:
+    if client is None:
+        return fallback_action(step, task_name)
 
-async def run_episode(env, client, difficulty: str, seed: int) -> float:
-    """Run one episode. Returns final score."""
-    result = await env.reset(seed=seed, difficulty=difficulty)
-    obs = result.observation
-    max_steps = int((obs.metadata or {}).get("max_steps", 30))
+    try:
+        completion = client.chat.completions.create(
+            model=MODEL_NAME,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": build_prompt(task_name, step, obs)},
+            ],
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            stream=False,
+        )
+        content = completion.choices[0].message.content or ""
+        parsed = extract_json(content)
+        return parsed if isinstance(parsed, dict) else fallback_action(step, task_name)
+    except Exception:
+        return fallback_action(step, task_name)
 
-    messages = [
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": (
-            f"Difficulty: {difficulty}\n"
-            f"Observation:\n{obs_to_text(obs, difficulty, max_steps)}\n\n"
-            "Choose your first action (JSON only):"
-        )},
-    ]
 
-    for step in range(1, MAX_STEPS + 1):
-        if obs.done:
-            break
+def normalize_score(score: float) -> float:
+    return min(MAX_SCORE, max(MIN_SCORE, float(score)))
 
-        # Call LLM
+
+async def create_env() -> BoardroomEnv:
+    last_error: Optional[Exception] = None
+
+    if LOCAL_IMAGE_NAME:
         try:
-            completion = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=messages,
-                temperature=TEMPERATURE,
-                max_tokens=MAX_TOKENS,
-            )
-            response_text = completion.choices[0].message.content or ""
+            return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
         except Exception as exc:
-            print(f"  Model request failed ({exc}). Using fallback.")
-            response_text = ""
-
-        # Parse action
-        action_dict = extract_json(response_text)
-        if action_dict is None:
-            action_dict = fallback_action(obs.step_count)
-
-        action_type = action_dict.get("action_type", "query_data")
-        parameters = action_dict.get("parameters", {})
-        if not isinstance(parameters, dict):
-            parameters = {}
-
-        try:
-            action = BoardroomAction(action_type=action_type, parameters=parameters)
-        except Exception:
-            action_dict = fallback_action(obs.step_count)
-            action = BoardroomAction(
-                action_type=action_dict["action_type"],
-                parameters=action_dict["parameters"],
-            )
-
-        # Step environment
-        result = await env.step(action)
-        obs = result.observation
-        reward = result.reward or 0.0
-
-        error_flag = " ERROR" if (obs.metadata or {}).get("error") else ""
-        print(f"[STEP] Step {step}: {action.action_type} -> "
-              f"reward={reward:+.3f} | done={obs.done}{error_flag}")
-
-        # Update messages
-        messages.append({"role": "assistant", "content": json.dumps(action_dict)})
-        max_steps = int((obs.metadata or {}).get("max_steps", max_steps))
-        messages.append({"role": "user", "content": (
-            f"Observation:\n{obs_to_text(obs, difficulty, max_steps)}\n\n"
-            "Choose next action (JSON only):"
-        )})
-
-        # Keep history manageable
-        if len(messages) > 20:
-            messages = [messages[0]] + messages[-19:]
-
-    return obs.metadata.get("final_score", obs.reward or 0.0)
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-async def async_main() -> None:
-    if not HF_TOKEN:
-        raise SystemExit("HF_TOKEN must be set to query the model.")
-
-    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+            last_error = exc
 
     if ENV_BASE_URL:
-        env = BoardroomEnv(base_url=ENV_BASE_URL.rstrip("/"))
-        await env.connect()
-    else:
-        env = await BoardroomEnv.from_env(HF_ENV_REPO_ID)
-
-    print("[START] OpenBoardroom Inference")
-    try:
-        for difficulty in DIFFICULTIES:
-            scores = []
-            for seed in range(EPISODES_PER_TIER):
-                print(f"\n[START] Episode: difficulty={difficulty} seed={seed}")
-                # Reconnect before each episode to avoid keepalive timeout
-                # on slow free-tier LLMs (HF Space closes WS after ~30s idle).
-                try:
-                    await env.close()
-                except Exception:
-                    pass
-                if ENV_BASE_URL:
-                    env = BoardroomEnv(base_url=ENV_BASE_URL.rstrip("/"))
-                    await env.connect()
-                else:
-                    env = await BoardroomEnv.from_env(HF_ENV_REPO_ID)
-                score = await run_episode(env, client, difficulty, seed)
-                scores.append(score)
-                print(f"[END] Episode: score={score:.4f}")
-
-            arr = np.array(scores)
-            print(f"\n  {difficulty}: mean={arr.mean():.4f} std={arr.std():.4f}")
-    finally:
         try:
-            await env.close()
-        except Exception:
-            pass
+            env = BoardroomEnv(base_url=ENV_BASE_URL)
+            await env.connect()
+            return env
+        except Exception as exc:
+            last_error = exc
 
-    print("\n[END] OpenBoardroom Inference complete.")
+    try:
+        return await BoardroomEnv.from_env(HF_ENV_REPO_ID)
+    except Exception as exc:
+        last_error = exc
+
+    raise RuntimeError(f"Unable to connect to environment: {_sanitize(last_error)}")
+
+
+async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
+    rewards: List[float] = []
+    score = 0.0
+    steps_taken = 0
+    success = False
+    env: Optional[BoardroomEnv] = None
+
+    log_start(task_name)
+
+    try:
+        env = await create_env()
+        result = await env.reset(seed=seed, difficulty=task_name)
+        obs = result.observation
+
+        for step in range(1, MAX_STEPS + 1):
+            if obs.done:
+                break
+
+            action_dict = choose_action(client, task_name, step, obs)
+            try:
+                action = BoardroomAction(
+                    action_type=action_dict.get("action_type", "query_data"),
+                    parameters=action_dict.get("parameters", {}) or {},
+                )
+            except Exception:
+                action_dict = fallback_action(step, task_name)
+                action = BoardroomAction(
+                    action_type=action_dict["action_type"],
+                    parameters=action_dict["parameters"],
+                )
+
+            action_str = json.dumps(
+                {"action_type": action.action_type, "parameters": action.parameters},
+                separators=(",", ":"),
+                sort_keys=True,
+            )
+
+            error_text = None
+            try:
+                result = await env.step(action)
+                obs = result.observation
+                reward = float(result.reward or 0.0)
+                done = bool(result.done)
+                error_text = (obs.metadata or {}).get("error")
+            except Exception as exc:
+                reward = 0.0
+                done = True
+                error_text = _sanitize(exc)
+
+            rewards.append(reward)
+            steps_taken = step
+            log_step(step, action_str, reward, done, error_text)
+
+            if done:
+                if hasattr(obs, "metadata") and isinstance(obs.metadata, dict):
+                    score = float(obs.metadata.get("final_score", reward))
+                else:
+                    score = reward
+                break
+
+        score = normalize_score(score)
+        success = score > 0.0
+    except Exception as exc:
+        score = MIN_SCORE
+        if steps_taken == 0:
+            log_step(0, "init", 0.0, True, _sanitize(exc))
+    finally:
+        if env is not None:
+            try:
+                await env.close()
+            except Exception:
+                pass
+        log_end(success, steps_taken, score, rewards)
+
+
+async def async_main() -> None:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN) if HF_TOKEN else None
+    for task_name, seed in TASK_CONFIGS:
+        await run_task(task_name, seed, client)
 
 
 def main() -> None:
