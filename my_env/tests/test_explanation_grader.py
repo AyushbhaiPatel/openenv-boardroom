@@ -85,3 +85,19 @@ class TestExplanationGrader:
         without = "We should cut costs."
         with_stake = "The analyst and CEO have different viewpoints on cutting costs."
         assert self.grader.grade(with_stake, self.ctx) > self.grader.grade(without, self.ctx)
+
+    def test_oracle_aliases_count_as_alignment(self) -> None:
+        ctx = {"difficulty": "medium", "objective": "test", "oracle_answer": "monthly_active_users"}
+        alias_score = self.grader.grade("Monthly active users are falling and MAU is weak.", ctx)
+        miss_score = self.grader.grade("Revenue is fine and costs are stable.", ctx)
+        assert alias_score > miss_score
+
+    def test_launch_oracle_does_not_match_negative_phrase(self) -> None:
+        ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "launch"}
+        negative_score = self.grader._score_oracle_alignment(
+            "We should do not launch Feature X until risk drops.", ctx
+        )
+        positive_score = self.grader._score_oracle_alignment(
+            "We should launch Feature X with support safeguards.", ctx
+        )
+        assert positive_score > negative_score

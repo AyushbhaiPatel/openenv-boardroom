@@ -185,7 +185,26 @@ class TestDecisionDifficulty:
             },
         ))
         assert obs.done is True
-        assert obs.metadata["final_score"] < 0.45
+        stronger_env = BoardroomEnvironment()
+        stronger_env.reset(seed=42, difficulty="hard")
+        for metric in ["churn_rate", "support_load", "release_risk"]:
+            stronger_env.step(BoardroomAction(action_type="query_data", parameters={"metric": metric}))
+        stronger = stronger_env.step(BoardroomAction(
+            action_type="make_decision",
+            parameters={
+                "decision": "delay feature x launch",
+                "parameters": {
+                    "rollout_percentage": 10,
+                    "support_headcount_delta": 4,
+                    "rollback_plan": "Hold launch behind a feature flag and rollback within one hour if churn spikes.",
+                },
+                "explanation": (
+                    "Support capacity and release risk are elevated, while churn is already rising. "
+                    "The analyst and risk officer feedback suggest delaying broad launch until support capacity improves."
+                ),
+            },
+        ))
+        assert obs.metadata["final_score"] < stronger.metadata["final_score"]
 
     def test_hard_task_rewards_structured_launch_plan_fields(self):
         env = BoardroomEnvironment()
@@ -245,3 +264,31 @@ class TestDecisionDifficulty:
         ))
 
         assert structured.metadata["final_score"] > generic.metadata["final_score"]
+
+    def test_easy_decision_alignment_accepts_oracle_aliases(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=2, difficulty="easy")
+        env._oracle_answer = "monthly_active_users"
+        alias_score = env._score_decision_alignment(
+            "focus on onboarding",
+            "Monthly active users and MAU are the clearest bottlenecks.",
+        )
+        plain_score = env._score_decision_alignment(
+            "focus on onboarding",
+            "Revenue feels soft, but the story is unclear.",
+        )
+        assert alias_score > plain_score
+
+    def test_hard_launch_alignment_penalizes_negative_launch_intent(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="hard")
+        env._oracle_answer = "launch"
+        negative_score = env._score_decision_alignment(
+            "delay feature x launch",
+            "Delay launch until release risk and support capacity improve.",
+        )
+        positive_score = env._score_decision_alignment(
+            "launch feature x",
+            "Launch now with support safeguards because capacity is stable.",
+        )
+        assert positive_score > negative_score
