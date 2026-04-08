@@ -10,6 +10,7 @@ from openai import OpenAI
 
 from my_env.client import BoardroomEnv
 from my_env.models import BoardroomAction
+from my_env.policy import ScenarioAwarePolicy
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "Qwen/Qwen2.5-72B-Instruct")
@@ -80,98 +81,8 @@ def extract_json(text: str) -> Optional[Dict[str, Any]]:
         return None
 
 
-def fallback_action(step: int, task_name: str) -> Dict[str, Any]:
-    # Phase 1: Query key metrics relevant to the task (steps 1-3)
-    if step == 1:
-        return {"action_type": "query_data", "parameters": {"metric": "revenue"}}
-    if step == 2:
-        return {"action_type": "query_data", "parameters": {"metric": "churn_rate"}}
-    if step == 3:
-        if task_name == "hard":
-            return {"action_type": "query_data", "parameters": {"metric": "monthly_active_users"}}
-        if task_name == "medium":
-            return {"action_type": "query_data", "parameters": {"metric": "ad_spend"}}
-        return {"action_type": "query_data", "parameters": {"metric": "monthly_active_users"}}
-    # Phase 2: Analyze trends (step 4)
-    if step == 4:
-        return {"action_type": "analyze_trend", "parameters": {"metric": "revenue", "quarters": 4}}
-    # Phase 3: Consult stakeholders (steps 5-7)
-    if step == 5:
-        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "analyst"}}
-    if step == 6:
-        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "ceo"}}
-    if step == 7:
-        return {"action_type": "consult_stakeholder", "parameters": {"stakeholder": "risk_officer"}}
-    # Phase 4: Additional data gathering for medium/hard (steps 8-9)
-    if step == 8:
-        if task_name == "hard":
-            return {"action_type": "query_data", "parameters": {"metric": "support_load"}}
-        if task_name == "medium":
-            return {"action_type": "query_data", "parameters": {"metric": "cac"}}
-        return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
-    if step == 9:
-        if task_name == "hard":
-            return {"action_type": "query_data", "parameters": {"metric": "release_risk"}}
-        if task_name == "medium":
-            return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
-        return {"action_type": "analyze_trend", "parameters": {"metric": "monthly_active_users", "quarters": 3}}
-    # Phase 5: Counterfactual simulation (step 10)
-    if step == 10:
-        if task_name == "hard":
-            return {
-                "action_type": "simulate_counterfactual",
-                "parameters": {
-                    "decision": "phased launch with added support coverage",
-                    "parameters": {
-                        "rollout_percentage": 20,
-                        "support_headcount_delta": 4,
-                    },
-                },
-            }
-        return {
-            "action_type": "simulate_counterfactual",
-            "parameters": {"decision": "improve retention and pricing", "parameters": {"budget": 50000}},
-        }
-    # Phase 6: Final decision (step 11+ for easy, later for medium/hard)
-    if task_name == "easy" or step >= 11:
-        if task_name == "hard":
-            decision = "delay feature x launch"
-            params = {
-                "rollout_percentage": 10,
-                "support_headcount_delta": 4,
-                "rollback_plan": "Gate the release behind a feature flag and rollback within one hour if churn or tickets spike.",
-            }
-            explanation = (
-                "Support capacity and release risk are both elevated, while churn is already sensitive. "
-                "This conclusion is uncertain because noisy signals may hide second-order effects, but the analyst and risk officer both support delaying broad launch until support load stabilizes."
-            )
-        elif task_name == "medium":
-            decision = "address churn before scaling"
-            params = {"priority": "retention", "budget": 50000}
-            explanation = (
-                "Revenue, churn, and user metrics indicate the core constraint is retention. "
-                "The trend data shows churn rising over multiple quarters despite ad spend increases. "
-                "This conclusion is uncertain because noisy signals may hide second-order effects. "
-                "The analyst and risk officer support a measured response grounded in the observed data."
-            )
-        else:
-            decision = "address churn before scaling"
-            params = {"priority": "retention"}
-            explanation = (
-                "Revenue, churn, and user metrics indicate the core constraint is retention. "
-                "This conclusion is uncertain because noisy signals may hide second-order effects. "
-                "The analyst and risk officer support a measured response grounded in the observed data."
-            )
-        return {
-            "action_type": "make_decision",
-            "parameters": {
-                "decision": decision,
-                "parameters": params,
-                "explanation": explanation,
-            },
-        }
-    # Extra rounds for medium: more trend analysis
-    return {"action_type": "analyze_trend", "parameters": {"metric": "churn_rate", "quarters": 4}}
+def fallback_action(step: int, task_name: str, policy: ScenarioAwarePolicy) -> Dict[str, Any]:
+    return policy.next_action(step)
 
 
 def build_prompt(task_name: str, step: int, obs: Any) -> str:
@@ -196,9 +107,15 @@ def build_prompt(task_name: str, step: int, obs: Any) -> str:
     )
 
 
-def choose_action(client: Optional[OpenAI], task_name: str, step: int, obs: Any) -> Dict[str, Any]:
+def choose_action(
+    client: Optional[OpenAI],
+    task_name: str,
+    step: int,
+    obs: Any,
+    policy: ScenarioAwarePolicy,
+) -> Dict[str, Any]:
     if client is None:
-        return fallback_action(step, task_name)
+        return fallback_action(step, task_name, policy)
 
     try:
         completion = client.chat.completions.create(
@@ -213,9 +130,9 @@ def choose_action(client: Optional[OpenAI], task_name: str, step: int, obs: Any)
         )
         content = completion.choices[0].message.content or ""
         parsed = extract_json(content)
-        return parsed if isinstance(parsed, dict) else fallback_action(step, task_name)
+        return parsed if isinstance(parsed, dict) else fallback_action(step, task_name, policy)
     except Exception:
-        return fallback_action(step, task_name)
+        return fallback_action(step, task_name, policy)
 
 
 def normalize_score(score: float) -> float:
@@ -223,13 +140,13 @@ def normalize_score(score: float) -> float:
 
 
 async def create_env() -> BoardroomEnv:
-    last_error: Optional[Exception] = None
+    errors: List[str] = []
 
     if LOCAL_IMAGE_NAME:
         try:
             return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
         except Exception as exc:
-            last_error = exc
+            errors.append(f"LOCAL_IMAGE_NAME={LOCAL_IMAGE_NAME}: {_sanitize(exc)}")
 
     if ENV_BASE_URL:
         try:
@@ -237,14 +154,26 @@ async def create_env() -> BoardroomEnv:
             await env.connect()
             return env
         except Exception as exc:
-            last_error = exc
+            errors.append(f"ENV_BASE_URL={ENV_BASE_URL}: {_sanitize(exc)}")
 
-    try:
-        return await BoardroomEnv.from_env(HF_ENV_REPO_ID)
-    except Exception as exc:
-        last_error = exc
+    if HF_ENV_REPO_ID:
+        try:
+            return await BoardroomEnv.from_env(HF_ENV_REPO_ID)
+        except Exception as exc:
+            errors.append(f"HF_ENV_REPO_ID={HF_ENV_REPO_ID}: {_sanitize(exc)}")
 
-    raise RuntimeError(f"Unable to connect to environment: {_sanitize(last_error)}")
+    if errors:
+        details = " | ".join(errors)
+        raise RuntimeError(
+            "Unable to connect to environment. Set a valid "
+            "LOCAL_IMAGE_NAME, ENV_BASE_URL, or HF_ENV_REPO_ID. "
+            f"Attempts: {details}"
+        )
+
+    raise RuntimeError(
+        "Unable to connect to environment. Provide one of LOCAL_IMAGE_NAME, "
+        "ENV_BASE_URL, or HF_ENV_REPO_ID before running inference."
+    )
 
 
 async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
@@ -260,19 +189,20 @@ async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
         env = await create_env()
         result = await env.reset(seed=seed, difficulty=task_name)
         obs = result.observation
+        policy = ScenarioAwarePolicy(difficulty=task_name, snapshot=obs.data_tables)
 
         for step in range(1, MAX_STEPS + 1):
             if obs.done:
                 break
 
-            action_dict = choose_action(client, task_name, step, obs)
+            action_dict = choose_action(client, task_name, step, obs, policy)
             try:
                 action = BoardroomAction(
                     action_type=action_dict.get("action_type", "query_data"),
                     parameters=action_dict.get("parameters", {}) or {},
                 )
             except Exception:
-                action_dict = fallback_action(step, task_name)
+                action_dict = fallback_action(step, task_name, policy)
                 action = BoardroomAction(
                     action_type=action_dict["action_type"],
                     parameters=action_dict["parameters"],

@@ -161,6 +161,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         self._scenario_resolved: bool = False
         self._queried_metrics: set[str] = set()
         self._trend_metrics: set[str] = set()
+        self._trend_requests: set[str] = set()
         self._simulation_signatures: set[str] = set()
 
     # ------------------------------------------------------------------
@@ -229,6 +230,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         self._episode_history = []
         self._queried_metrics = set()
         self._trend_metrics = set()
+        self._trend_requests = set()
         self._simulation_signatures = set()
         self._audit.clear()
 
@@ -423,6 +425,8 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         """Handle analyze_trend: return trend data from history."""
         metric = action.parameters["metric"]
         quarters = int(action.parameters["quarters"])
+        novel = metric not in self._trend_requests
+        self._trend_requests.add(metric)
 
         history = self._company_state.history
         # Get the last N quarters of data for the metric
@@ -448,7 +452,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         relevant = metric in relevant_set
         if trend_data and relevant:
             self._trend_metrics.add(metric)
-        reward_context = {"noise_handled": noise_handled, "relevant": relevant}
+        reward_context = {"noise_handled": noise_handled, "relevant": relevant, "novel": novel}
         return data_tables, None, None, reward_context
 
     def _handle_simulate_counterfactual(

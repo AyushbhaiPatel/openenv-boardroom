@@ -111,6 +111,28 @@ class TestStep:
         quarters = [entry["quarter"] for entry in env._company_state.history]
         assert quarters == sorted(quarters)
 
+    def test_repeated_irrelevant_query_gets_small_penalty(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="medium")
+        first = env.step(BoardroomAction(action_type="query_data", parameters={"metric": "ltv"}))
+        second = env.step(BoardroomAction(action_type="query_data", parameters={"metric": "ltv"}))
+        assert first.reward == 0.0
+        assert second.reward < 0.0
+
+    def test_repeated_irrelevant_trend_gets_small_penalty(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="medium")
+        first = env.step(BoardroomAction(
+            action_type="analyze_trend",
+            parameters={"metric": "ltv", "quarters": 4},
+        ))
+        second = env.step(BoardroomAction(
+            action_type="analyze_trend",
+            parameters={"metric": "ltv", "quarters": 4},
+        ))
+        assert first.reward == 0.12
+        assert second.reward < 0.0
+
 
 class TestErrorHandling:
     def test_invalid_params_no_step_advance(self):

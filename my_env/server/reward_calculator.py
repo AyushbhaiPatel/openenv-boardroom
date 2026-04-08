@@ -100,6 +100,8 @@ class RewardCalculator:
     def _reward_query_data(context: Dict[str, Any]) -> float:
         """query_data: reward relevant discovery, taper repeats."""
         if not context.get("relevant", False):
+            if not context.get("novel", True):
+                return -0.02
             return 0.0
         if context.get("novel", True):
             return 0.2
@@ -108,6 +110,8 @@ class RewardCalculator:
     @staticmethod
     def _reward_analyze_trend(context: Dict[str, Any]) -> float:
         """analyze_trend: reward sufficiently deep and targeted trend work."""
+        if not context.get("relevant", True) and not context.get("novel", True):
+            return -0.03
         if context.get("noise_handled", False) and context.get("relevant", True):
             return 0.25
         if context.get("noise_handled", False):
