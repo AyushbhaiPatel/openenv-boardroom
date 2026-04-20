@@ -41,9 +41,10 @@ class PolicyPlan:
 class ScenarioAwarePolicy:
     """Builds a compact plan tailored to the detected scenario archetype."""
 
-    def __init__(self, difficulty: str, snapshot: Dict[str, Any]) -> None:
+    def __init__(self, difficulty: str, snapshot: Dict[str, Any], *, multi_agent: bool = False) -> None:
         self.difficulty = difficulty if difficulty in _PROFILES else "medium"
         self.snapshot = snapshot
+        self.multi_agent = multi_agent
         self.plan = self._build_plan()
 
     def next_action(self, step: int) -> Dict[str, Any]:
@@ -64,6 +65,59 @@ class ScenarioAwarePolicy:
             }
 
         offset -= len(self.plan.trend_metrics)
+
+        # Multi-agent only: present_evidence targeting CFO (skip on easy — too few steps)
+        if self.multi_agent and self.difficulty != "easy" and offset == 1:
+            relevant_metric = self.plan.query_metrics[0] if self.plan.query_metrics else "support_load"
+            return {
+                "action_type": "present_evidence",
+                "parameters": {
+                    "target": "cfo",
+                    "metric": relevant_metric,
+                    "value": 0.0,
+                    "interpretation": (
+                        f"The data shows {relevant_metric} is a key risk indicator. "
+                        "Evidence suggests this metric warrants careful analysis before any decision. "
+                        "The trend data indicates elevated concern that exceeds safe thresholds."
+                    ),
+                },
+            }
+        if self.multi_agent and self.difficulty != "easy":
+            offset -= 1
+
+        # Multi-agent + hard: also present evidence to risk officer to unlock intel
+        if self.multi_agent and self.difficulty == "hard" and offset == 1:
+            return {
+                "action_type": "present_evidence",
+                "parameters": {
+                    "target": "risk_officer",
+                    "metric": "support_load",
+                    "value": 0.0,
+                    "interpretation": (
+                        "Support load data shows elevated risk trend. "
+                        "The metric indicates critical threshold concern that exceeds safe operating bounds. "
+                        "Evidence analysis shows this warrants immediate attention."
+                    ),
+                },
+            }
+        if self.multi_agent and self.difficulty == "hard":
+            offset -= 1
+
+        # Multi-agent + hard difficulty: negotiate with CEO to counter launch agenda
+        if self.multi_agent and offset == 1 and self.difficulty == "hard":
+            return {
+                "action_type": "negotiate",
+                "parameters": {
+                    "target": "ceo",
+                    "position": (
+                        "We should delay the launch and wait until support load and release risk "
+                        "are within safe bounds. The data indicates risk is too high to proceed now."
+                    ),
+                },
+            }
+        if self.multi_agent and self.difficulty == "hard":
+            offset -= 1
+
         if offset <= len(_STAKEHOLDERS):
             return {
                 "action_type": "consult_stakeholder",

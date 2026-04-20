@@ -26,15 +26,19 @@ TASK_CONFIGS: List[Tuple[str, int]] = [
     ("easy", 7),
     ("medium", 17),
     ("hard", 29),
+    ("multi_agent_easy", 7),
+    ("multi_agent_medium", 17),
+    ("multi_agent_hard", 29),
 ]
 MIN_SCORE = 0.01
 MAX_SCORE = 0.99
 
 SYSTEM_PROMPT = """You are solving a business operations simulation.
 Return exactly one JSON object with this shape:
-{"action_type":"query_data|analyze_trend|consult_stakeholder|simulate_counterfactual|make_decision","parameters":{...}}
+{"action_type":"query_data|analyze_trend|consult_stakeholder|simulate_counterfactual|make_decision|present_evidence|negotiate","parameters":{...}}
 Do not use markdown.
-Prioritize evidence gathering, then trends, stakeholders, simulation, and finally a grounded decision."""
+Prioritize evidence gathering, then trends, stakeholders, simulation, and finally a grounded decision.
+In multi-agent tasks, use present_evidence to influence board actors and negotiate to counter CEO lobbying before making your final decision."""
 
 
 def _sanitize(value: Any) -> str:
@@ -86,7 +90,19 @@ def fallback_action(step: int, task_name: str, policy: ScenarioAwarePolicy) -> D
 
 
 def build_prompt(task_name: str, step: int, obs: Any) -> str:
-    metadata = obs.metadata or {}
+    metadata = dict(obs.metadata or {})
+    for key in (
+        "objective",
+        "max_steps",
+        "difficulty",
+        "brief",
+        "actor_messages",
+        "board_vote",
+        "vote_result",
+    ):
+        value = getattr(obs, key, None)
+        if value not in (None, {}, []):
+            metadata.setdefault(key, value)
     return json.dumps(
         {
             "task": task_name,
@@ -139,22 +155,32 @@ def normalize_score(score: float) -> float:
     return min(MAX_SCORE, max(MIN_SCORE, float(score)))
 
 
-async def create_env() -> BoardroomEnv:
+async def create_env(is_multi_agent: bool = False) -> BoardroomEnv:
     errors: List[str] = []
+
+    env_base_url = ENV_BASE_URL
+    if is_multi_agent and not env_base_url.endswith("/multi"):
+        env_base_url = f"{env_base_url}/multi"
+
+    if LOCAL_IMAGE_NAME and not is_multi_agent:
+        try:
+            return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
+        except Exception as exc:
+            errors.append(f"LOCAL_IMAGE_NAME={LOCAL_IMAGE_NAME}: {_sanitize(exc)}")
+
+    if env_base_url:
+        try:
+            env = BoardroomEnv(base_url=env_base_url)
+            await env.connect()
+            return env
+        except Exception as exc:
+            errors.append(f"ENV_BASE_URL={env_base_url}: {_sanitize(exc)}")
 
     if LOCAL_IMAGE_NAME:
         try:
             return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
         except Exception as exc:
             errors.append(f"LOCAL_IMAGE_NAME={LOCAL_IMAGE_NAME}: {_sanitize(exc)}")
-
-    if ENV_BASE_URL:
-        try:
-            env = BoardroomEnv(base_url=ENV_BASE_URL)
-            await env.connect()
-            return env
-        except Exception as exc:
-            errors.append(f"ENV_BASE_URL={ENV_BASE_URL}: {_sanitize(exc)}")
 
     if HF_ENV_REPO_ID:
         try:
@@ -183,13 +209,22 @@ async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
     success = False
     env: Optional[BoardroomEnv] = None
 
+    # Map multi-agent task names to difficulty
+    difficulty_map = {
+        "multi_agent_easy": "easy",
+        "multi_agent_medium": "medium",
+        "multi_agent_hard": "hard",
+    }
+    difficulty = difficulty_map.get(task_name, task_name)
+    is_multi_agent = task_name.startswith("multi_agent_")
+
     log_start(task_name)
 
     try:
-        env = await create_env()
-        result = await env.reset(seed=seed, difficulty=task_name)
+        env = await create_env(is_multi_agent=is_multi_agent)
+        result = await env.reset(seed=seed, difficulty=difficulty)
         obs = result.observation
-        policy = ScenarioAwarePolicy(difficulty=task_name, snapshot=obs.data_tables)
+        policy = ScenarioAwarePolicy(difficulty=difficulty, snapshot=obs.data_tables, multi_agent=is_multi_agent)
 
         for step in range(1, MAX_STEPS + 1):
             if obs.done:
@@ -231,10 +266,7 @@ async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
             log_step(step, action_str, reward, done, error_text)
 
             if done:
-                if hasattr(obs, "metadata") and isinstance(obs.metadata, dict):
-                    score = float(obs.metadata.get("final_score", reward))
-                else:
-                    score = reward
+                score = float(getattr(obs, "final_score", None) or (obs.metadata or {}).get("final_score", reward))
                 break
 
         score = normalize_score(score)
@@ -247,8 +279,8 @@ async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
         if env is not None:
             try:
                 await env.close()
-            except Exception:
-                pass
+            except Exception as exc:
+                print(f"[WARN] env.close() failed: {_sanitize(exc)}")
         log_end(success, steps_taken, score, rewards)
 
 

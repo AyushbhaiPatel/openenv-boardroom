@@ -63,16 +63,33 @@ class BoardroomEnv(
         Returns:
             StepResult with BoardroomObservation
         """
-        obs_data = payload.get("observation", {})
+        obs_data = dict(payload.get("observation", {}))
+        metadata = dict(obs_data.pop("metadata", {}) or {})
+        for key in (
+            "objective",
+            "max_steps",
+            "difficulty",
+            "seed",
+            "brief",
+            "step_reward",
+            "final_score",
+            "oracle_answer",
+            "oracle_hit",
+            "audit_trail",
+            "error",
+            "actor_messages",
+            "board_vote",
+            "vote_result",
+        ):
+            value = obs_data.get(key)
+            if value not in (None, {}, []):
+                metadata.setdefault(key, value)
+
         observation = BoardroomObservation(
-            data_tables=obs_data.get("data_tables", {}),
-            stakeholder_feedback=obs_data.get("stakeholder_feedback"),
-            simulation_results=obs_data.get("simulation_results"),
-            quarter=obs_data.get("quarter", 1),
-            step_count=obs_data.get("step_count", 0),
+            **obs_data,
             done=payload.get("done", False),
             reward=payload.get("reward"),
-            metadata=obs_data.get("metadata", {}),
+            metadata=metadata,
         )
 
         return StepResult(
