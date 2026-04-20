@@ -8,9 +8,11 @@
 
 from .client import BoardroomEnv
 from .models import BoardroomAction, BoardroomObservation
+from .server.multi_agent_boardroom_environment import MultiAgentBoardroomEnvironment
 
 __all__ = [
     "BoardroomEnv",
     "BoardroomAction",
     "BoardroomObservation",
+    "MultiAgentBoardroomEnvironment",
 ]

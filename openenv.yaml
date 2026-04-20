@@ -6,7 +6,9 @@ app: server.app:app
 port: 8000
 description: >
   OpenBoardroom — OpenEnv environment where an agent acts as CDO at a simulated SaaS company.
-  Actions: query_data, analyze_trend, consult_stakeholder, simulate_counterfactual, make_decision.
+  Includes single-agent tasks and multi-agent boardroom tasks with CEO, CFO, and Risk Officer actors.
+  Actions: query_data, analyze_trend, consult_stakeholder, simulate_counterfactual, make_decision,
+  present_evidence, negotiate.
   Local run: pip install -e . && uvicorn server.app:app --host 0.0.0.0 --port 8000
 documentation: https://github.com/AyushbhaiPatel/openenv-boardroom
 
@@ -35,5 +37,33 @@ tasks:
       Noisy data plus misleading signals, 30 steps. Balance growth vs risk; use counterfactual
       engine and conflicting stakeholder views. Final explanation is graded for data evidence,
       uncertainty, stakeholder awareness, and alignment with the launch objective.
+    difficulty: hard
+    max_steps: 30
+
+  - id: multi_agent_easy
+    name: "Multi-Agent: Find the Growth Bottleneck"
+    description: >
+      Multi-agent variant of the easy tier. Three independent board actors (CEO, CFO, Risk Officer)
+      act every step. CDO must present evidence, negotiate, and secure a 2/3 board majority vote.
+    environment: multi_agent_boardroom
+    difficulty: easy
+    max_steps: 10
+
+  - id: multi_agent_medium
+    name: "Multi-Agent: Diagnose the Revenue Drop"
+    description: >
+      Multi-agent variant of the medium tier. CEO lobbies CFO each step. CDO must out-evidence
+      the CEO's lobbying to flip the CFO's stance before making a final board decision.
+    environment: multi_agent_boardroom
+    difficulty: medium
+    max_steps: 20
+
+  - id: multi_agent_hard
+    name: "Multi-Agent: Should We Launch Feature X?"
+    description: >
+      Multi-agent hard tier. CEO has a hidden launch agenda and suppresses key metrics.
+      Risk Officer monitors thresholds and sends proactive alerts. CDO must detect deception,
+      present contradicting evidence, and secure a board majority vote.
+    environment: multi_agent_boardroom
     difficulty: hard
     max_steps: 30

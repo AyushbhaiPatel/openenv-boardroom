@@ -23,7 +23,7 @@ from pydantic import Field, field_validator
 class BoardroomAction(Action):
     """Action for the OpenBoardroom environment.
 
-    The agent selects one of five action types with action-specific parameters.
+    The agent selects an action type with action-specific parameters.
     """
 
     action_type: Literal[
@@ -32,6 +32,8 @@ class BoardroomAction(Action):
         "simulate_counterfactual",
         "consult_stakeholder",
         "make_decision",
+        "present_evidence",
+        "negotiate",
     ] = Field(..., description="Type of action to take")
     parameters: Dict[str, Any] = Field(
         default_factory=dict,
@@ -73,6 +75,32 @@ class BoardroomObservation(Observation):
     )
     quarter: int = Field(default=1, description="Current quarter number")
     step_count: int = Field(default=0, description="Steps taken this episode")
+    objective: Optional[str] = Field(default=None, description="Episode objective")
+    max_steps: Optional[int] = Field(default=None, description="Maximum episode length")
+    difficulty: Optional[str] = Field(default=None, description="Difficulty tier")
+    seed: Optional[int] = Field(default=None, description="Episode seed")
+    brief: Optional[str] = Field(default=None, description="Scenario brief")
+    step_reward: Optional[float] = Field(default=None, description="Raw reward for the final action")
+    final_score: Optional[float] = Field(default=None, description="Final episode score")
+    oracle_answer: Optional[str] = Field(default=None, description="Hidden oracle answer revealed at episode end")
+    oracle_hit: Optional[bool] = Field(default=None, description="Whether the final decision matched the oracle")
+    audit_trail: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Episode audit trail revealed at episode end",
+    )
+    error: Optional[str] = Field(default=None, description="Environment error message")
+    actor_messages: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Latest messages from multi-agent board actors",
+    )
+    board_vote: Dict[str, str] = Field(
+        default_factory=dict,
+        description="Board approval breakdown for a final decision",
+    )
+    vote_result: Optional[str] = Field(
+        default=None,
+        description="Board vote result: approved or rejected",
+    )
 
 
 @dataclass
@@ -139,3 +167,19 @@ class AuditEntry:
     action_params: Dict[str, Any]
     reward: float
     timestamp: str  # ISO 8601
+
+
+@dataclass
+class ActorState:
+    """State for a multi-agent boardroom participant."""
+
+    name: str
+    stance: str
+    lobby_pressure: float = 0.0
+    evidence_weight: float = 0.0
+    alert_active: bool = False
+    alert_history: list = field(default_factory=list)
+    hidden_metrics: set = field(default_factory=set)
+    hidden_agenda: str = ""
+    budget_utilisation: float = 0.0
+    intel_unlocked: bool = False

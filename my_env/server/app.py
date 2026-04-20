@@ -23,9 +23,11 @@ from fastapi.responses import HTMLResponse
 try:
     from my_env.models import BoardroomAction, BoardroomObservation
     from my_env.server.boardroom_environment import BoardroomEnvironment
+    from my_env.server.multi_agent_boardroom_environment import MultiAgentBoardroomEnvironment
 except ImportError:  # pragma: no cover — inside Docker PYTHONPATH=/app/env
     from models import BoardroomAction, BoardroomObservation
     from boardroom_environment import BoardroomEnvironment
+    from multi_agent_boardroom_environment import MultiAgentBoardroomEnvironment
 
 
 app = create_app(
@@ -36,6 +38,17 @@ app = create_app(
     max_concurrent_envs=1,
 )
 
+multi_agent_app = create_app(
+    MultiAgentBoardroomEnvironment,
+    BoardroomAction,
+    BoardroomObservation,
+    env_name="multi_agent_boardroom",
+    max_concurrent_envs=1,
+)
+
+# Mount multi-agent environment under /multi so both envs are served from one container
+app.mount("/multi", multi_agent_app)
+
 
 @app.get("/", response_class=HTMLResponse, include_in_schema=False)
 async def root():
@@ -44,7 +57,7 @@ async def root():
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>OpenBoardroom — Try the AI Environment</title>
+<title>OpenBoardroom — Multi-Agent Boardroom Demo</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf3;min-height:100vh;display:flex;flex-direction:column}
@@ -165,8 +178,8 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
 
 <div class="header">
   <div>
-    <div class="header-title">📊 OpenBoardroom &nbsp;<span style="font-size:0.75rem;background:#1a3a1a;color:#3fb950;padding:2px 8px;border-radius:20px;font-weight:500"><span class="live-dot"></span>Live</span></div>
-    <div class="header-sub">You are the Chief Data Officer of a SaaS company. Make smart decisions using data.</div>
+    <div class="header-title">📊 OpenBoardroom &nbsp;<span style="font-size:0.75rem;background:#1a3a1a;color:#3fb950;padding:2px 8px;border-radius:20px;font-weight:500"><span class="live-dot"></span>Multi-Agent Live</span></div>
+    <div class="header-sub">You are the CDO. Use evidence and negotiation to win a 2/3 board vote.</div>
   </div>
 </div>
 
@@ -184,26 +197,26 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
   <!-- ── SCREEN 1: Choose difficulty ── -->
   <div id="screen-1">
     <div class="card">
-      <div class="card-title">Choose your challenge</div>
-      <div class="card-sub">Pick a difficulty. The AI agent (or you!) will try to solve the business problem.</div>
+      <div class="card-title">Choose your boardroom challenge</div>
+      <div class="card-sub">Pick a difficulty. CEO, CFO, and Risk Officer actors will respond every step.</div>
       <div class="diff-grid">
         <div class="diff-card selected" id="diff-easy" role="button" tabindex="0" aria-pressed="true" onkeydown="handleCardKey(event, function(){ pickDiff('easy'); })" onclick="pickDiff('easy')">
           <div class="diff-icon">🟢</div>
           <div class="diff-name">Easy</div>
           <div class="diff-desc">Find the Growth Bottleneck</div>
-          <div class="diff-steps">10 steps · Clean data</div>
+          <div class="diff-steps">10 steps · Board vote</div>
         </div>
         <div class="diff-card" id="diff-medium" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickDiff('medium'); })" onclick="pickDiff('medium')">
           <div class="diff-icon">🟡</div>
           <div class="diff-name">Medium</div>
           <div class="diff-desc">Diagnose the Revenue Drop</div>
-          <div class="diff-steps">20 steps · Noisy data</div>
+          <div class="diff-steps">20 steps · CEO lobbying</div>
         </div>
         <div class="diff-card" id="diff-hard" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickDiff('hard'); })" onclick="pickDiff('hard')">
           <div class="diff-icon">🔴</div>
           <div class="diff-name">Hard</div>
           <div class="diff-desc">Should We Launch Feature X?</div>
-          <div class="diff-steps">30 steps · Misleading signals</div>
+          <div class="diff-steps">30 steps · Hidden agenda</div>
         </div>
       </div>
       <button class="btn btn-primary" onclick="startGame()">▶ Start Episode</button>
@@ -252,9 +265,17 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
           <span class="action-icon">🔬</span>
           <div><div class="action-name">Run a simulation</div><div class="action-hint">Test what would happen with a decision</div></div>
         </div>
+        <div class="action-btn" id="act-present_evidence" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('present_evidence'); })" onclick="pickAction('present_evidence')">
+          <span class="action-icon">📌</span>
+          <div><div class="action-name">Present evidence</div><div class="action-hint">Use a metric to influence CEO, CFO, or Risk Officer</div></div>
+        </div>
+        <div class="action-btn" id="act-negotiate" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('negotiate'); })" onclick="pickAction('negotiate')">
+          <span class="action-icon">🤝</span>
+          <div><div class="action-name">Negotiate</div><div class="action-hint">Counter CEO lobbying before the board vote</div></div>
+        </div>
         <div class="action-btn" id="act-make_decision" role="button" tabindex="0" aria-pressed="false" onkeydown="handleCardKey(event, function(){ pickAction('make_decision'); })" onclick="pickAction('make_decision')">
           <span class="action-icon">✅</span>
-          <div><div class="action-name">Make final decision</div><div class="action-hint">Submit your conclusion and end the episode</div></div>
+          <div><div class="action-name">Call board vote</div><div class="action-hint">Submit your final recommendation for approval</div></div>
         </div>
       </div>
 
@@ -317,14 +338,61 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#0d1117;color:#e6edf
         </div>
       </div>
 
-      <div id="params-make_decision" class="hidden">
+      <div id="params-present_evidence" class="hidden">
         <div class="param-field">
-          <label>What is your final decision?</label>
-          <input type="text" id="p-final-decision" placeholder="e.g. reduce churn by improving onboarding"/>
+          <label>Who should receive the evidence?</label>
+          <select id="p-evidence-target">
+            <option value="cfo">💼 CFO — can flip to evidence-based</option>
+            <option value="risk_officer">🛡️ Risk Officer — can unlock risk intel</option>
+            <option value="ceo">👔 CEO — can expose hidden agenda</option>
+          </select>
         </div>
         <div class="param-field">
-          <label>Explain your reasoning (the more detail, the better your score)</label>
-          <textarea id="p-explanation" placeholder="Based on the data I looked at, the main issue is... I consulted the analyst who said... Therefore I recommend..."></textarea>
+          <label>Which metric supports your point?</label>
+          <select id="p-evidence-metric">
+            <option value="support_load">🛟 Support Load</option>
+            <option value="release_risk">⚠️ Release Risk</option>
+            <option value="churn_rate">📉 Churn Rate</option>
+            <option value="revenue">💰 Revenue</option>
+            <option value="monthly_active_users">👥 Monthly Active Users</option>
+            <option value="cac">🎯 CAC</option>
+            <option value="ltv">💎 LTV</option>
+            <option value="ad_spend">📢 Ad Spend</option>
+          </select>
+        </div>
+        <div class="param-field">
+          <label>Metric value</label>
+          <input type="text" id="p-evidence-value" placeholder="e.g. 0.92"/>
+        </div>
+        <div class="param-field">
+          <label>Interpretation</label>
+          <textarea id="p-evidence-interpretation" placeholder="Support load is critically elevated, so launch risk is high."></textarea>
+        </div>
+      </div>
+
+      <div id="params-negotiate" class="hidden">
+        <div class="param-field">
+          <label>Who do you want to negotiate with?</label>
+          <select id="p-negotiate-target">
+            <option value="ceo">👔 CEO — reduce launch lobbying</option>
+            <option value="cfo">💼 CFO — reinforce evidence-based stance</option>
+            <option value="risk_officer">🛡️ Risk Officer — address safety concern</option>
+          </select>
+        </div>
+        <div class="param-field">
+          <label>Your position</label>
+          <textarea id="p-negotiate-position" placeholder="We should delay launch until support capacity improves and risk is lower."></textarea>
+        </div>
+      </div>
+
+      <div id="params-make_decision" class="hidden">
+        <div class="param-field">
+          <label>What recommendation goes to the board?</label>
+          <input type="text" id="p-final-decision" placeholder="e.g. delay feature x launch"/>
+        </div>
+        <div class="param-field">
+          <label>Explain your reasoning</label>
+          <textarea id="p-explanation" placeholder="Support load and release risk are elevated, so a broad launch should wait until capacity improves."></textarea>
         </div>
       </div>
 
@@ -363,10 +431,11 @@ let ws = null;
 let pendingResolve = null;
 let pendingReject = null;
 let requestInFlight = false;
+const actionTypes = ['query_data','analyze_trend','consult_stakeholder','simulate_counterfactual','present_evidence','negotiate','make_decision'];
 const difficultyHints = {
-  easy: ['Focus on <strong>core bottlenecks</strong>', 'Start with <strong>revenue</strong>, <strong>MAU</strong>, or <strong>churn</strong>'],
-  medium: ['Check <strong>trend direction</strong>', 'Revenue-drop tasks often need <strong>ad spend</strong> and <strong>CAC</strong> context'],
-  hard: ['Launch tasks reward <strong>support load</strong> and <strong>release risk</strong>', 'Use <strong>stakeholders</strong> and a <strong>rollback plan</strong> before deciding'],
+  easy: ['Win a <strong>2/3 board vote</strong>', 'Use <strong>present evidence</strong> before the final decision'],
+  medium: ['CEO lobbying grows each step', 'Flip the <strong>CFO</strong> with strong data evidence'],
+  hard: ['The CEO may hide <strong>support load</strong> and <strong>release risk</strong>', 'Negotiate, unlock risk intel, then call the vote'],
 };
 
 function setBusyState(isBusy) {
@@ -383,7 +452,7 @@ function setBusyState(isBusy) {
     sendBtn.textContent = isBusy ? '⏳ Please wait...' : 'Send Action';
     sendBtn.setAttribute('aria-disabled', String(isBusy));
   }
-  ['query_data','analyze_trend','consult_stakeholder','simulate_counterfactual','make_decision'].forEach(function(x) {
+  actionTypes.forEach(function(x) {
     const el = document.getElementById('act-'+x);
     if (el) {
       el.classList.toggle('busy', isBusy);
@@ -425,7 +494,7 @@ function handleCardKey(event, action) {
 function openWS() {
   return new Promise((resolve, reject) => {
     const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-    const sock = new WebSocket(proto + '://' + location.host + '/ws');
+    const sock = new WebSocket(proto + '://' + location.host + '/multi/ws');
     sock.onopen  = () => { ws = sock; resolve(); };
     sock.onerror = () => reject(new Error('WebSocket failed'));
     sock.onmessage = (e) => {
@@ -484,7 +553,7 @@ function pickDiff(d) {
 function pickAction(a) {
   if (requestInFlight) return;
   selectedAction = a;
-  ['query_data','analyze_trend','consult_stakeholder','simulate_counterfactual','make_decision'].forEach(x => {
+  actionTypes.forEach(x => {
     const actionBtn = document.getElementById('act-'+x);
     actionBtn.classList.toggle('selected', x===a);
     actionBtn.setAttribute('aria-pressed', String(x===a));
@@ -523,9 +592,9 @@ async function startGame() {
     const resp = await wsSend({type:'reset', data:{difficulty: selectedDiff, seed: 0}});
     const {obs} = parseObs(resp);
     curStep  = obs.step_count || 0;
-    maxStep  = (obs.metadata && obs.metadata.max_steps) || (selectedDiff==='easy'?10:selectedDiff==='medium'?20:30);
+    maxStep  = obs.max_steps || (obs.metadata && obs.metadata.max_steps) || (selectedDiff==='easy'?10:selectedDiff==='medium'?20:30);
     totalReward = 0;
-    document.getElementById('objective-text').textContent = (obs.metadata && obs.metadata.objective) || 'Investigate the company and make a strategic decision.';
+    document.getElementById('objective-text').textContent = obs.objective || (obs.metadata && obs.metadata.objective) || 'Investigate the company and make a strategic decision.';
     document.getElementById('cur-step').textContent = curStep;
     document.getElementById('max-step').textContent  = maxStep;
     document.getElementById('progress-bar').style.width = '0%';
@@ -555,6 +624,14 @@ function buildAction() {
   } else if(selectedAction === 'simulate_counterfactual') {
     params.decision = document.getElementById('p-decision').value || 'optimize_growth';
     params.parameters = {};
+  } else if(selectedAction === 'present_evidence') {
+    params.target = document.getElementById('p-evidence-target').value;
+    params.metric = document.getElementById('p-evidence-metric').value;
+    params.value = document.getElementById('p-evidence-value').value || 'observed';
+    params.interpretation = document.getElementById('p-evidence-interpretation').value || 'The data shows elevated risk and should influence the board vote.';
+  } else if(selectedAction === 'negotiate') {
+    params.target = document.getElementById('p-negotiate-target').value;
+    params.position = document.getElementById('p-negotiate-position').value || 'We should slow down until the evidence supports moving forward.';
   } else if(selectedAction === 'make_decision') {
     params.decision = document.getElementById('p-final-decision').value || 'balanced_approach';
     params.parameters = {};
@@ -584,11 +661,33 @@ function renderResult(obs, reward) {
     }
     html += '</div></div>';
   }
+  const actorMessages = (obs.actor_messages && Object.keys(obs.actor_messages).length) ? obs.actor_messages : (obs.metadata && obs.metadata.actor_messages);
+  if(actorMessages) {
+    html += '<div class="result-section"><div class="feedback-box"><div class="feedback-label">Board actors</div>';
+    for(const [name,msg] of Object.entries(actorMessages)) {
+      html += '<div style="margin-top:6px"><span style="color:#8b949e">'+name.replace(/_/g,' ')+':</span> <b>'+String(msg)+'</b></div>';
+    }
+    html += '</div></div>';
+  }
+  const boardVote = (obs.board_vote && Object.keys(obs.board_vote).length) ? obs.board_vote : (obs.metadata && obs.metadata.board_vote);
+  const voteResult = obs.vote_result || (obs.metadata && obs.metadata.vote_result);
+  if(boardVote) {
+    html += '<div class="result-section"><div class="feedback-box"><div class="feedback-label">Board vote</div>';
+    for(const [name,vote] of Object.entries(boardVote)) {
+      const voteCls = vote === 'approve' ? 'green' : 'red';
+      html += '<div class="result-row"><span class="result-label">'+name.replace(/_/g,' ')+'</span><span class="result-val '+voteCls+'">'+vote+'</span></div>';
+    }
+    if(voteResult) {
+      html += '<div class="result-row"><span class="result-label">Result</span><span class="result-val blue">'+voteResult+'</span></div>';
+    }
+    html += '</div></div>';
+  }
   const rCls = reward>0?'green':reward<0?'red':'blue';
   const rStr = (reward>=0?'+':'')+reward.toFixed(4);
   html += '<div class="result-row" style="margin-top:10px"><span class="result-label">Reward earned</span><span class="result-val '+rCls+'">'+rStr+'</span></div>';
-  if(obs.metadata && obs.metadata.error) {
-    html += '<div style="color:#f85149;font-size:0.82rem;margin-top:8px">⚠️ '+obs.metadata.error+'</div>';
+  const errorText = obs.error || (obs.metadata && obs.metadata.error);
+  if(errorText) {
+    html += '<div style="color:#f85149;font-size:0.82rem;margin-top:8px">⚠️ '+errorText+'</div>';
   }
   if(!html) html = '<div class="result-empty">No data returned for this action.</div>';
   document.getElementById('result-content').innerHTML = html;
@@ -608,10 +707,10 @@ async function sendAction() {
     document.getElementById('progress-bar').style.width = Math.min(100,(curStep/maxStep)*100)+'%';
     renderResult(obs, reward);
     if(done) {
-      const score = (obs.metadata && obs.metadata.final_score != null) ? obs.metadata.final_score : reward;
+      const score = (obs.final_score != null) ? obs.final_score : ((obs.metadata && obs.metadata.final_score != null) ? obs.metadata.final_score : reward);
       setTimeout(function(){ showEndScreen(score, curStep); }, 600);
     } else {
-      const labels = {query_data:'Metric queried ✓',analyze_trend:'Trend analyzed ✓',consult_stakeholder:'Colleague consulted ✓',simulate_counterfactual:'Simulation complete ✓',make_decision:'Decision submitted ✓'};
+      const labels = {query_data:'Metric queried ✓',analyze_trend:'Trend analyzed ✓',consult_stakeholder:'Colleague consulted ✓',simulate_counterfactual:'Simulation complete ✓',present_evidence:'Evidence presented ✓',negotiate:'Negotiation sent ✓',make_decision:'Board vote called ✓'};
       showToast(labels[action.action_type] || 'Action sent ✓');
     }
   } catch(e) {

@@ -8,7 +8,9 @@
 
 try:
     from my_env.server.boardroom_environment import BoardroomEnvironment
+    from my_env.server.multi_agent_boardroom_environment import MultiAgentBoardroomEnvironment
 except ImportError:  # pragma: no cover — inside Docker
     from boardroom_environment import BoardroomEnvironment
+    from multi_agent_boardroom_environment import MultiAgentBoardroomEnvironment
 
-__all__ = ["BoardroomEnvironment"]
+__all__ = ["BoardroomEnvironment", "MultiAgentBoardroomEnvironment"]
