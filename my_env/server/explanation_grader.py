@@ -25,7 +25,7 @@ _DATA_EVIDENCE_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"\brevenue\b", re.IGNORECASE),
     re.compile(r"\bchurn\b", re.IGNORECASE),
     re.compile(r"\bmau\b", re.IGNORECASE),
-    re.compile(r"\bmonthly.active.users?\b", re.IGNORECASE),
+    re.compile(r"\bmonthly[.\s_-]active[.\s_-]users?\b", re.IGNORECASE),
     re.compile(r"\bcac\b", re.IGNORECASE),
     re.compile(r"\bltv\b", re.IGNORECASE),
     re.compile(r"\bad.spend\b", re.IGNORECASE),

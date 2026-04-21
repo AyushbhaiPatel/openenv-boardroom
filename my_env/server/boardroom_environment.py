@@ -251,6 +251,11 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             step_count=self._step_count,
             done=False,
             reward=0.0,
+            objective=metadata["objective"],
+            max_steps=metadata["max_steps"],
+            difficulty=metadata["difficulty"],
+            seed=metadata["seed"],
+            brief=metadata["brief"],
             metadata=metadata,
         )
 
@@ -300,6 +305,8 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
         }[action.action_type]
 
         data_tables, stakeholder_feedback, simulation_results, reward_context = handler(action)
+        if "error" in reward_context:
+            return self._error_observation(str(reward_context["error"]))
 
         # Apply noise to data_tables (medium/hard)
         if data_tables and self._noise is not None:
@@ -366,6 +373,16 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             step_count=self._step_count,
             done=done,
             reward=reward,
+            objective=metadata["objective"],
+            max_steps=metadata["max_steps"],
+            difficulty=metadata["difficulty"],
+            seed=metadata["seed"],
+            brief=metadata["brief"],
+            step_reward=metadata.get("step_reward"),
+            final_score=metadata.get("final_score"),
+            oracle_answer=metadata.get("oracle_answer"),
+            oracle_hit=metadata.get("oracle_hit"),
+            audit_trail=metadata.get("audit_trail", []),
             metadata=metadata,
         )
 
@@ -424,7 +441,10 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
     ) -> tuple:
         """Handle analyze_trend: return trend data from history."""
         metric = action.parameters["metric"]
-        quarters = int(action.parameters["quarters"])
+        try:
+            quarters = int(action.parameters["quarters"])
+        except (TypeError, ValueError):
+            return {}, None, None, {"error": "Invalid quarters value"}
         novel = metric not in self._trend_requests
         self._trend_requests.add(metric)
 
@@ -594,6 +614,7 @@ class BoardroomEnvironment(Environment[BoardroomAction, BoardroomObservation, St
             step_count=self._step_count,
             done=self._done,
             reward=0.0,
+            error=message,
             metadata={"error": message},
         )
 

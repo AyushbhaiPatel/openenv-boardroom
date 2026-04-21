@@ -45,6 +45,35 @@ _TIER_WEIGHTS: Dict[str, Dict[str, float]] = {
     },
 }
 
+# Multi-agent episodes split evidence presentation out from general stakeholder
+# handling so repeated present_evidence steps do not dilute negotiation/consulting.
+_MULTI_AGENT_TIER_WEIGHTS: Dict[str, Dict[str, float]] = {
+    "easy": {
+        "data_gathering": 0.32,
+        "analysis": 0.20,
+        "counterfactual": 0.20,
+        "stakeholder": 0.08,
+        "evidence": 0.10,
+        "decision": 0.10,
+    },
+    "medium": {
+        "data_gathering": 0.20,
+        "analysis": 0.20,
+        "counterfactual": 0.20,
+        "stakeholder": 0.16,
+        "evidence": 0.12,
+        "decision": 0.12,
+    },
+    "hard": {
+        "data_gathering": 0.16,
+        "analysis": 0.20,
+        "counterfactual": 0.26,
+        "stakeholder": 0.14,
+        "evidence": 0.12,
+        "decision": 0.12,
+    },
+}
+
 
 class RewardCalculator:
     """Dense, multi-component reward computation.
@@ -160,9 +189,9 @@ class RewardCalculator:
     ) -> float:
         """Compute the final normalized episode score in [0.0, 1.0].
 
-        Aggregates cumulative step rewards across four component buckets
-        (data_gathering, analysis, counterfactual, stakeholder) and applies
-        difficulty-tier-specific weights.
+        Aggregates cumulative step rewards across component buckets and applies
+        difficulty-tier-specific weights. Multi-agent episodes use a dedicated
+        evidence bucket for present_evidence actions.
 
         Args:
             episode_history: List of step records.  Each record is a dict
@@ -183,27 +212,39 @@ class RewardCalculator:
 
         # Determine difficulty from the first entry (consistent across episode).
         difficulty = episode_history[0].get("difficulty", "medium")
-        weights = _TIER_WEIGHTS.get(difficulty, _TIER_WEIGHTS["medium"])
+        is_multi_agent_episode = any(
+            entry.get("action_type") in {"present_evidence", "negotiate"}
+            for entry in episode_history
+        )
+        weight_profiles = (
+            _MULTI_AGENT_TIER_WEIGHTS if is_multi_agent_episode else _TIER_WEIGHTS
+        )
+        weights = weight_profiles.get(difficulty, weight_profiles["medium"])
 
         buckets: Dict[str, float] = {
             "data_gathering": 0.0,
             "analysis": 0.0,
             "counterfactual": 0.0,
             "stakeholder": 0.0,
+            "evidence": 0.0,
             "decision": 0.0,
         }
-        counts: Dict[str, int] = {
+        bucket_max_possible: Dict[str, float] = {
             "data_gathering": 0,
             "analysis": 0,
             "counterfactual": 0,
             "stakeholder": 0,
+            "evidence": 0,
             "decision": 0,
         }
+        bucket_min_possible: Dict[str, float] = dict(bucket_max_possible)
         max_rewards: Dict[str, float] = {
             "query_data": 0.2,
             "analyze_trend": 0.25,
             "simulate_counterfactual": 0.3,
             "consult_stakeholder": 0.15,
+            "present_evidence": 0.15,
+            "negotiate": 0.25,
             "make_decision": 0.5,
         }
         min_rewards: Dict[str, float] = {
@@ -214,6 +255,8 @@ class RewardCalculator:
             "analyze_trend": "analysis",
             "simulate_counterfactual": "counterfactual",
             "consult_stakeholder": "stakeholder",
+            "present_evidence": "evidence",
+            "negotiate": "stakeholder",
             "make_decision": "decision",
         }
 
@@ -227,35 +270,23 @@ class RewardCalculator:
                 buckets[bucket] += reward  # signed: penalties count
             else:
                 buckets[bucket] += max(reward, 0.0)
-            counts[bucket] += 1
+            bucket_max_possible[bucket] += max_rewards.get(action_type, 0.0)
+            bucket_min_possible[bucket] += min_rewards.get(action_type, 0.0)
 
         normalized: Dict[str, float] = {}
         for key in buckets:
-            if counts[key] == 0:
+            hi = bucket_max_possible[key]
+            lo = bucket_min_possible[key]
+            if hi == 0.0 and lo == 0.0:
                 normalized[key] = 0.0
                 continue
-            if key == "decision":
-                n = counts[key]
-                lo = n * min_rewards.get("make_decision", -0.1)
-                hi = n * max_rewards.get("make_decision", 0.5)
-                span = hi - lo
-                if span > 0:
-                    normalized[key] = max(
-                        0.0, min(1.0, (buckets[key] - lo) / span)
-                    )
-                else:
-                    normalized[key] = 0.0
-            else:
-                max_per_step = max(
-                    max_rewards.get(at, 0.5)
-                    for at, b in bucket_map.items()
-                    if b == key
+            span = hi - lo
+            if span > 0:
+                normalized[key] = max(
+                    0.0, min(1.0, (buckets[key] - lo) / span)
                 )
-                max_possible = counts[key] * max_per_step
-                if max_possible > 0:
-                    normalized[key] = min(buckets[key] / max_possible, 1.0)
-                else:
-                    normalized[key] = 0.0
+            else:
+                normalized[key] = 0.0
 
         score = sum(weights[k] * normalized.get(k, 0.0) for k in weights)
 
