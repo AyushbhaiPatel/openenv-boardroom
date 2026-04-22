@@ -92,6 +92,12 @@ class TestExplanationGrader:
         miss_score = self.grader.grade("Revenue is fine and costs are stable.", ctx)
         assert alias_score > miss_score
 
+    def test_monthly_active_users_requires_real_separators(self) -> None:
+        bad = self.grader._score_data_evidence("monthly9active users are falling")
+        good = self.grader._score_data_evidence("monthly active users are falling")
+        assert bad == 0.0
+        assert good > bad
+
     def test_launch_oracle_does_not_match_negative_phrase(self) -> None:
         ctx = {"difficulty": "hard", "objective": "Should we launch Feature X?", "oracle_answer": "launch"}
         negative_score = self.grader._score_oracle_alignment(

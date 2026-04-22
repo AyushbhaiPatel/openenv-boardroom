@@ -118,6 +118,35 @@ class TestParseResult:
         assert result.reward == 0.75
         assert "audit_trail" in result.observation.metadata
 
+    def test_rebuilds_metadata_from_serialized_fields(self):
+        client = BoardroomEnv.__new__(BoardroomEnv)
+        payload = {
+            "observation": {
+                "data_tables": {},
+                "quarter": 1,
+                "step_count": 1,
+                "objective": "Find the growth bottleneck",
+                "max_steps": 10,
+                "difficulty": "easy",
+                "final_score": 0.91,
+                "actor_messages": {"ceo": "Move fast."},
+                "board_vote": {"ceo": "approve", "cfo": "approve", "risk_officer": "reject"},
+                "vote_result": "approved",
+            },
+            "reward": 0.91,
+            "done": True,
+        }
+        result = client._parse_result(payload)
+
+        obs = result.observation
+        assert obs.objective == "Find the growth bottleneck"
+        assert obs.max_steps == 10
+        assert obs.final_score == 0.91
+        assert obs.actor_messages == {"ceo": "Move fast."}
+        assert obs.board_vote["risk_officer"] == "reject"
+        assert obs.metadata["objective"] == "Find the growth bottleneck"
+        assert obs.metadata["board_vote"] == obs.board_vote
+
 
 class TestParseState:
     """Tests for _parse_state deserialization."""

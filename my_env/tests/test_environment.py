@@ -105,6 +105,16 @@ class TestStep:
         ))
         assert len(obs.data_tables["trend"]) >= 4
 
+    def test_invalid_trend_quarters_returns_error_observation(self):
+        env = BoardroomEnvironment()
+        env.reset(seed=42, difficulty="medium")
+        obs = env.step(BoardroomAction(
+            action_type="analyze_trend",
+            parameters={"metric": "revenue", "quarters": "abc"},
+        ))
+        assert obs.error == "Invalid quarters value"
+        assert obs.reward == 0.0
+
     def test_reset_history_has_monotonic_quarters(self):
         env = BoardroomEnvironment()
         env.reset(seed=42, difficulty="medium")

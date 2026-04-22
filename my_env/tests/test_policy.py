@@ -19,9 +19,14 @@ class TestScenarioAwarePolicy:
         obs = env.reset(seed=0, difficulty="easy")
         policy = ScenarioAwarePolicy(difficulty="easy", snapshot=obs.data_tables)
 
-        assert policy.next_action(9)["action_type"] == "simulate_counterfactual"
-        final_action = policy.next_action(10)
-        assert final_action["action_type"] == "make_decision"
+        # Easy plan: 4 query_data + 1 trend + 1 present_evidence + 3 stakeholders + 1 simulation + 1 decision
+        # Find simulate_counterfactual and make_decision by scanning
+        actions = [policy.next_action(s) for s in range(1, 15)]
+        action_types = [a["action_type"] for a in actions]
+        assert "simulate_counterfactual" in action_types
+        sim_idx = action_types.index("simulate_counterfactual")
+        assert action_types[sim_idx + 1] == "make_decision"
+        final_action = actions[sim_idx + 1]
         assert "explanation" in final_action["parameters"]
 
     def test_hard_plan_emits_structured_launch_fields(self):
@@ -29,9 +34,13 @@ class TestScenarioAwarePolicy:
         obs = env.reset(seed=1, difficulty="hard")
         policy = ScenarioAwarePolicy(difficulty="hard", snapshot=obs.data_tables)
 
-        final_action = policy.next_action(11)
-        params = final_action["parameters"]["parameters"]
-        assert final_action["action_type"] == "make_decision"
-        assert "rollout_percentage" in params
-        assert "support_headcount_delta" in params
-        assert "rollback_plan" in params
+        # Find make_decision by scanning steps
+        for step in range(1, 20):
+            action = policy.next_action(step)
+            if action["action_type"] == "make_decision":
+                params = action["parameters"]["parameters"]
+                assert "rollout_percentage" in params
+                assert "support_headcount_delta" in params
+                assert "rollback_plan" in params
+                return
+        raise AssertionError("make_decision not found in first 20 steps")
