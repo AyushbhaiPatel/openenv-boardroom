@@ -140,10 +140,15 @@ class NoiseInjector:
     def _mislead(value: float | int) -> float:
         """Return a value whose direction is opposite to the original.
 
-        For positive values the result is negative (and vice-versa).
-        For zero the result is a small negative offset.
+        For positive values the result is pushed toward zero (inverted
+        direction) but never goes negative, since business metrics like
+        revenue, MAU, and support_load cannot be negative in reality.
+        For zero the result is a small positive offset.
         """
         if value == 0:
-            return -1.0
-        # Negate and add a 30% magnitude shift to make the reversal clear.
-        return float(-value * 0.3)
+            return 0.01
+        if value > 0:
+            # Push toward zero: keep 70% reduction but floor at 0.0
+            return max(0.0, float(value * 0.3))
+        # Negative values (rare): flip toward positive
+        return float(abs(value) * 0.3)

@@ -185,13 +185,33 @@ class RewardLogger:
 # ---------------------------------------------------------------------------
 
 
+# Fields that hold lightweight, per-episode mutable state.  Heavy subsystems
+# like the CounterfactualEngine (PyTorch model) and RewardCalculator are
+# stateless across steps and never need snapshotting.
+_SNAPSHOT_FIELDS: tuple[str, ...] = (
+    "_episode_id", "_step_count", "_done", "_seed", "_difficulty",
+    "_scenario", "_company_state", "_noise",
+    "_consultation_history", "_episode_history", "_scenario_resolved",
+    "_queried_metrics", "_trend_metrics", "_trend_requests",
+    "_simulation_signatures",
+    # multi-agent specific
+    "_actor_states", "_board_vote_count", "_cfo_flip_rewarded",
+    "_revision_chance_used", "_last_cdo_action_type", "_last_cdo_target",
+    "_hidden_metric_revealed", "_ceo_contradiction_flag", "_rng",
+    # audit trail is cleared on reset, safe to deepcopy
+    "_audit",
+)
+
+
 def _snapshot_env(env: MultiAgentBoardroomEnvironment) -> Dict[str, Any]:
-    return copy.deepcopy(env.__dict__)
+    """Snapshot only the mutable episode state, skipping heavy subsystems."""
+    return {k: copy.deepcopy(env.__dict__[k]) for k in _SNAPSHOT_FIELDS if k in env.__dict__}
 
 
 def _restore_env(env: MultiAgentBoardroomEnvironment, snapshot: Dict[str, Any]) -> None:
-    env.__dict__.clear()
-    env.__dict__.update(copy.deepcopy(snapshot))
+    """Restore snapshotted fields without touching subsystems like the CF engine."""
+    for k, v in snapshot.items():
+        env.__dict__[k] = copy.deepcopy(v)
 
 
 def make_reward_fn(env: MultiAgentBoardroomEnvironment, scheduler: CurriculumScheduler,

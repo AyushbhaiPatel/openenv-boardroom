@@ -207,33 +207,106 @@ class MultiAgentBoardroomEnvironment(BoardroomEnvironment):
                         "actor_messages": actor_msgs,
                     },
                 )
-            obs = super().step(action, timeout_s=timeout_s, **kwargs)
+
+            # --- Run the parent handler directly (not super().step()) so we
+            # can fold board/alert rewards into the history entry *before*
+            # compute_final_score runs, instead of mutating after the fact. ---
+            data_tables, sf, sr, ctx = self._handle_make_decision(action)
+            if "error" in ctx:
+                return self._error_observation(str(ctx["error"]))
+
+            # Apply noise
+            if data_tables and self._noise is not None:
+                data_tables = self._noise.inject(data_tables)
+
+            # Advance step counter
+            self._step_count += 1
+
+            # Compute base step reward from parent reward calculator
+            step_reward = self._reward_calc.compute_step_reward(action, ctx)
+
+            # Fold board vote and alert rewards into the step reward upfront
+            board_reward = ctx.get("board_reward", 0.0)
+            alert_reward = ctx.get("alert_reward", 0.0)
+            step_reward += board_reward + alert_reward
+
+            # Record episode history with the complete reward
+            history_entry: Dict[str, Any] = {
+                "action_type": action.action_type,
+                "reward": step_reward,
+                "difficulty": self._difficulty,
+                **ctx,
+            }
+            self._episode_history.append(history_entry)
+
+            # Check termination
+            done = self._step_count >= self._scenario.max_steps or self._scenario_resolved
+            self._done = done
+
+            # Build metadata
+            metadata: Dict[str, Any] = {
+                "objective": self._scenario.objective,
+                "max_steps": self._scenario.max_steps,
+                "difficulty": self._difficulty,
+                "seed": self._seed,
+                "brief": self._build_scenario_brief(),
+            }
+
+            reward = step_reward
+            if done:
+                final_score = max(0.01, min(0.99, self._reward_calc.compute_final_score(self._episode_history)))
+                oracle_hit = False
+                if self._oracle_answer:
+                    decision_text = (action.parameters.get("decision") or "").lower()
+                    explanation_text = (action.parameters.get("explanation") or "").lower()
+                    oracle_hit = self._oracle_alignment_hit(decision_text, explanation_text)
+                if oracle_hit:
+                    final_score = min(0.99, final_score + 0.05)
+                metadata["step_reward"] = step_reward
+                metadata["final_score"] = final_score
+                metadata["oracle_answer"] = self._oracle_answer
+                metadata["oracle_hit"] = oracle_hit
+                metadata["audit_trail"] = self._audit.get_trail()
+                reward = final_score
+
+            # Board vote metadata
+            vote = ctx.get("board_vote", {})
+            vote_result = ctx.get("vote_result", "")
+
+            obs = BoardroomObservation(
+                data_tables=data_tables or {},
+                stakeholder_feedback=sf,
+                simulation_results=sr,
+                quarter=self._company_state.quarter,
+                step_count=self._step_count,
+                done=done,
+                reward=reward,
+                objective=metadata["objective"],
+                max_steps=metadata["max_steps"],
+                difficulty=metadata["difficulty"],
+                seed=metadata["seed"],
+                brief=metadata["brief"],
+                step_reward=metadata.get("step_reward"),
+                final_score=metadata.get("final_score"),
+                oracle_answer=metadata.get("oracle_answer"),
+                oracle_hit=metadata.get("oracle_hit"),
+                audit_trail=metadata.get("audit_trail", []),
+                board_vote=vote,
+                vote_result=vote_result,
+                metadata=metadata,
+            )
+            obs.metadata["board_vote"] = vote
+            obs.metadata["vote_result"] = vote_result
+
+            self._audit.record(
+                step=self._step_count, quarter=self._company_state.quarter,
+                action=action, observation=obs, reward=reward,
+            )
+
             actor_messages = self._run_actor_step()
             obs.metadata["actor_messages"] = actor_messages
             obs.actor_messages = actor_messages
             self._update_cfo_stance()
-            if self._episode_history:
-                last = self._episode_history[-1]
-                if "board_vote" in last:
-                    obs.metadata["board_vote"] = last["board_vote"]
-                    obs.metadata["vote_result"] = last.get("vote_result", "")
-                    obs.board_vote = last["board_vote"]
-                    obs.vote_result = last.get("vote_result", "")
-                    board_reward = last.get("board_reward", 0.0)
-                    alert_reward = last.get("alert_reward", 0.0)
-                    extra_reward = board_reward + alert_reward
-                    if extra_reward:
-                        last["reward"] = float(last.get("reward", 0.0)) + extra_reward
-                        if obs.done:
-                            final_score = max(0.01, min(0.99, self._reward_calc.compute_final_score(self._episode_history)))
-                            oracle_hit = bool(obs.metadata.get("oracle_hit", obs.oracle_hit))
-                            if oracle_hit:
-                                final_score = min(0.99, final_score + 0.05)
-                            obs.reward = final_score
-                            obs.final_score = final_score
-                            obs.metadata["final_score"] = final_score
-                        else:
-                            obs.reward = obs.reward + extra_reward
             return obs
 
         obs = super().step(action, timeout_s=timeout_s, **kwargs)

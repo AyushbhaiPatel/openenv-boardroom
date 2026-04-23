@@ -90,7 +90,7 @@ def run_episodes(EnvClass, multi_agent: bool, episodes_per_tier: int) -> List[Di
                     action_type=a["action_type"],
                     parameters=a["parameters"],
                 ))
-            score = obs.metadata.get("final_score", obs.reward or 0.0)
+            score = obs.final_score if obs.final_score is not None else obs.metadata.get("final_score", obs.reward or 0.0)
             episode_num += 1
             records.append({
                 "episode": episode_num,

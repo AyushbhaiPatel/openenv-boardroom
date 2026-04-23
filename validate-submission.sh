@@ -2,7 +2,7 @@
 #
 # validate-submission.sh — OpenEnv Submission Validator
 #
-set -uo pipefail
+set -euo pipefail
 
 DOCKER_BUILD_TIMEOUT=600
 

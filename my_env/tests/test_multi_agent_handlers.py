@@ -168,8 +168,17 @@ class TestBoardVoting:
             parameters={"decision": "reduce churn", "parameters": {}, "explanation": "churn is the bottleneck"},
         ))
         last = env_easy._episode_history[-1]
+        # Board reward should be present in the history context
         assert last["board_reward"] == pytest.approx(0.2)
-        assert last["reward"] == pytest.approx(obs.step_reward + last["board_reward"] + last["alert_reward"])
+        # The history reward includes board + alert rewards folded in upfront.
+        # Verify by recomputing: base_step_reward = reward - board - alert
+        from my_env.server.reward_calculator import RewardCalculator
+        calc = RewardCalculator()
+        base = calc.compute_step_reward(
+            BoardroomAction(action_type="make_decision", parameters={}),
+            {"decision_quality": last["decision_quality"], "explanation_score": last["explanation_score"]},
+        )
+        assert last["reward"] == pytest.approx(base + last["board_reward"] + last["alert_reward"])
         assert obs.final_score == pytest.approx(obs.reward)
 
     def test_majority_vote_resolves_episode(self, env_easy):

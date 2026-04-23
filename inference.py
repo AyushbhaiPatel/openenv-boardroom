@@ -162,9 +162,13 @@ async def create_env(is_multi_agent: bool = False) -> BoardroomEnv:
     if is_multi_agent and not env_base_url.endswith("/multi"):
         env_base_url = f"{env_base_url}/multi"
 
-    if LOCAL_IMAGE_NAME and not is_multi_agent:
+    if LOCAL_IMAGE_NAME:
         try:
-            return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
+            env = await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
+            if is_multi_agent:
+                # Multi-agent environment is mounted under /multi on the same container
+                env.base_url = f"{env.base_url.rstrip('/')}/multi"
+            return env
         except Exception as exc:
             errors.append(f"LOCAL_IMAGE_NAME={LOCAL_IMAGE_NAME}: {_sanitize(exc)}")
 
@@ -175,12 +179,6 @@ async def create_env(is_multi_agent: bool = False) -> BoardroomEnv:
             return env
         except Exception as exc:
             errors.append(f"ENV_BASE_URL={env_base_url}: {_sanitize(exc)}")
-
-    if LOCAL_IMAGE_NAME:
-        try:
-            return await BoardroomEnv.from_docker_image(LOCAL_IMAGE_NAME)
-        except Exception as exc:
-            errors.append(f"LOCAL_IMAGE_NAME={LOCAL_IMAGE_NAME}: {_sanitize(exc)}")
 
     if HF_ENV_REPO_ID:
         try:
@@ -270,7 +268,7 @@ async def run_task(task_name: str, seed: int, client: Optional[OpenAI]) -> None:
                 break
 
         score = normalize_score(score)
-        success = score > 0.0
+        success = score > MIN_SCORE
     except Exception as exc:
         score = MIN_SCORE
         if steps_taken == 0:
