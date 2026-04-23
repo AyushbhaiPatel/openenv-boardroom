@@ -1,0 +1,4 @@
+difficulty,naive_mean,policy_mean,absolute_gain,relative_gain_pct
+easy,0.4108,0.9752,0.5644,137.4
+medium,0.1595,0.9522,0.7928,497.2
+hard,0.2419,0.934,0.6921,286.0
