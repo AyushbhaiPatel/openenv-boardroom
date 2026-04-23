@@ -30,6 +30,7 @@ htmlcov/
 .tox/
 .nox/
 hypothesis/
+.hypothesis/
 
 # Type checkers & linters
 .mypy_cache/
@@ -56,6 +57,15 @@ Thumbs.db
 *~
 
 # Generated wiki files
-.qoder/
+.kiro/
+
+# Generated smoke-training artifacts. Commit grpo_output/rewards.csv and
+# grpo_output/reward_curve.png only after replacing smoke output with a real run.
+grpo_output/
+kaggle_output/
+
+# Judge-facing demo artifacts are intentionally not ignored.
+!demo_output/
+demo_output/.matplotlib/
 
 # .vscode/
