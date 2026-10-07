@@ -1,0 +1,3265 @@
+<!doctype html>
+<html
+  lang="en"
+  class="geist_a71539c9-module__T19VSG__variable geist_mono_8d43a2aa-module__8Li5zG__variable bricolage_grotesque_1efb576-module__C8kmdG__variable instrument_serif_bed06b21-module__swPsvG__variable h-full antialiased"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenBoardroom — Escalating reminders</title>
+    <meta
+      name="description"
+      content="A local frontend recreation of OpenBoardroom. Escalating reminders, in the channels you choose."
+    />
+    <link rel="icon" href="/assets/icon.svg" />
+    <link rel="stylesheet" href="/assets/reference.css" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="min-h-full flex flex-col">
+    <header class="border-b border-nb-rule bg-nb-paper">
+      <div
+        class="mx-auto flex h-16 max-w-6xl items-center justify-between px-6"
+      >
+        <a class="font-serif text-2xl text-nb-ink tracking-tight" href="#"
+          >OpenBoardroom</a
+        >
+        <nav class="hidden items-center gap-8 md:flex">
+          <a
+            class="text-sm font-medium text-nb-ink-soft transition-colors hover:text-nb-ink"
+            href="#how-it-works"
+            >How it works</a
+          ><a
+            class="text-sm font-medium text-nb-ink-soft transition-colors hover:text-nb-ink"
+            href="#use-cases"
+            >Use cases</a
+          ><a
+            class="text-sm font-medium text-nb-ink-soft transition-colors hover:text-nb-ink"
+            href="#pricing"
+            >Pricing</a
+          >
+        </nav>
+        <div class="flex items-center gap-4">
+          <a
+            class="text-sm font-medium text-nb-ink-soft transition-colors hover:text-nb-ink"
+            href="/sign-in"
+            >Sign in</a
+          ><a
+            class="bg-nb-ink text-nb-paper px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-80"
+            href="/sign-in"
+            >Get started →</a
+          >
+        </div>
+      </div>
+    </header>
+    <main>
+      <section class="bg-nb-paper border-b border-nb-rule px-6 pt-10 pb-20">
+        <div class="mx-auto max-w-6xl">
+          <div
+            class="grid grid-cols-1 gap-12 lg:grid-cols-[1.2fr_1fr] lg:gap-20 items-center"
+          >
+            <div>
+              <p
+                class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-5"
+              >
+                For agents and the people who run them
+              </p>
+              <h1
+                class="font-serif text-5xl leading-[1.12] tracking-tight text-nb-ink sm:text-6xl lg:text-[4.5rem]"
+              >
+                Escalates
+                <em class="text-nb-amber-deep italic">the way you set it</em>.
+                Stops when you acknowledge.
+              </h1>
+              <p
+                class="mt-6 text-lg leading-relaxed text-nb-ink-soft max-w-[520px]"
+              >
+                Claude Code, Cursor, or any MCP host can schedule a reminder
+                that reaches you by email, WhatsApp, SMS or phone call, in the
+                steps and timing you choose. No agent? Set it up yourself on the
+                web in two minutes.
+              </p>
+              <div class="mt-9 flex flex-wrap gap-4 items-center">
+                <a
+                  class="bg-nb-ink text-nb-paper px-6 py-3.5 text-sm font-semibold transition-opacity hover:opacity-80"
+                  href="/sign-in"
+                  >Get started →</a
+                ><a
+                  href="#agents"
+                  class="border border-nb-rule px-6 py-3.5 text-sm font-medium text-nb-ink transition-colors hover:border-nb-ink"
+                  >Setup for agents</a
+                >
+              </div>
+              <div class="mt-10">
+                <p
+                  class="font-mono text-[10px] tracking-[0.12em] uppercase text-nb-ink-mute mb-3"
+                >
+                  Pick your channel →
+                </p>
+                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+                  <div
+                    class="p-3 border flex flex-col gap-2 bg-nb-ink border-nb-ink"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-phone w-5 h-5 text-nb-amber"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
+                      ></path>
+                    </svg>
+                    <p
+                      class="text-sm font-semibold leading-tight text-nb-paper"
+                    >
+                      Phone call
+                    </p>
+                    <p class="text-xs leading-snug text-nb-paper/60">
+                      When it absolutely must land
+                    </p>
+                  </div>
+                  <div
+                    class="p-3 border flex flex-col gap-2 bg-nb-paper border-nb-rule"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-message-circle w-5 h-5 text-nb-ink"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"
+                      ></path>
+                    </svg>
+                    <p class="text-sm font-semibold leading-tight text-nb-ink">
+                      WhatsApp
+                    </p>
+                    <p class="text-xs leading-snug text-nb-ink-soft">
+                      Where you already live
+                    </p>
+                  </div>
+                  <div
+                    class="p-3 border flex flex-col gap-2 bg-nb-paper border-nb-rule"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-message-square w-5 h-5 text-nb-ink"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"
+                      ></path>
+                    </svg>
+                    <p class="text-sm font-semibold leading-tight text-nb-ink">
+                      SMS
+                    </p>
+                    <p class="text-xs leading-snug text-nb-ink-soft">
+                      Can&#x27;t miss a text
+                    </p>
+                  </div>
+                  <div
+                    class="p-3 border flex flex-col gap-2 bg-nb-paper border-nb-rule"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-mail w-5 h-5 text-nb-ink"
+                      aria-hidden="true"
+                    >
+                      <path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"></path>
+                      <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    </svg>
+                    <p class="text-sm font-semibold leading-tight text-nb-ink">
+                      Email
+                    </p>
+                    <p class="text-xs leading-snug text-nb-ink-soft">
+                      For the low-stakes stuff
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="hidden lg:flex justify-center">
+              <div
+                style="
+                  width: 280px;
+                  height: 640px;
+                  position: relative;
+                  border-radius: 39.2px;
+                  background: linear-gradient(
+                    160deg,
+                    oklch(0.22 0.01 70),
+                    oklch(0.14 0.01 70)
+                  );
+                  padding: 9.8px;
+                  box-shadow:
+                    0 30px 60px -20px rgba(0, 0, 0, 0.35),
+                    0 0 0 1px oklch(0.08 0.01 70),
+                    inset 0 0 0 2px oklch(0.3 0.01 70);
+                "
+              >
+                <div
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 30.8px;
+                    overflow: hidden;
+                    background:
+                      radial-gradient(
+                        120% 60% at 50% 0%,
+                        oklch(0.28 0.04 55) 0%,
+                        transparent 50%
+                      ),
+                      linear-gradient(
+                        180deg,
+                        oklch(0.2 0.02 70) 0%,
+                        oklch(0.12 0.02 70) 100%
+                      );
+                    position: relative;
+                    font-family: var(--font-geist-sans), system-ui, sans-serif;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      padding: 14px 25.2px 7px;
+                      color: rgba(255, 255, 255, 0.9);
+                      font-size: 15.4px;
+                      font-weight: 600;
+                    "
+                  >
+                    <span>9:12</span
+                    ><span style="display: flex; gap: 4px; align-items: center"
+                      ><svg
+                        width="16.8"
+                        height="11.200000000000001"
+                        viewBox="0 0 16 10"
+                      >
+                        <path
+                          d="M0 8h2v2H0zm4-2h2v4H4zm4-2h2v6H8zm4-3h2v9h-2z"
+                          fill="currentColor"
+                        ></path></svg
+                      ><svg
+                        width="16.8"
+                        height="11.200000000000001"
+                        viewBox="0 0 20 10"
+                      >
+                        <rect
+                          x="0"
+                          y="1"
+                          width="16"
+                          height="8"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1"
+                        ></rect>
+                        <rect
+                          x="2"
+                          y="3"
+                          width="12"
+                          height="4"
+                          rx="1"
+                          fill="currentColor"
+                        ></rect>
+                        <rect
+                          x="17"
+                          y="4"
+                          width="2"
+                          height="2"
+                          fill="currentColor"
+                        ></rect></svg
+                    ></span>
+                  </div>
+                  <div
+                    style="
+                      position: absolute;
+                      top: 11.200000000000001px;
+                      left: 50%;
+                      transform: translateX(-50%);
+                      width: 89.60000000000001px;
+                      height: 23.8px;
+                      border-radius: 999px;
+                      background: #000;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      padding: 8.4px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8.4px;
+                    "
+                  >
+                    <div
+                      style="
+                        text-align: center;
+                        color: #fff;
+                        margin-top: 11.200000000000001px;
+                        margin-bottom: 4.2px;
+                      "
+                    >
+                      <div
+                        data-phone-date
+                        style="font-size: 14px; opacity: 0.8"
+                      >
+                         
+                      </div>
+                      <div
+                        style="
+                          font-size: 50.4px;
+                          font-weight: 200;
+                          letter-spacing: -0.02em;
+                          line-height: 0.95;
+                        "
+                      >
+                        9:12
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6.159999999999999px;
+                      "
+                    >
+                      <div
+                        style="
+                          padding: 8.4px 11.200000000000001px;
+                          border-radius: 11.200000000000001px;
+                          background: oklch(0.25 0.015 70 / 0.55);
+                          backdrop-filter: blur(20px);
+                          border: 1px solid rgba(255, 255, 255, 0.08);
+                          box-shadow: 0 0 0 2px oklch(0.72 0.17 55 / 0.3);
+                          color: #fff;
+                          display: flex;
+                          gap: 8.4px;
+                          align-items: flex-start;
+                          animation: nbSlideIn 0.5s
+                            cubic-bezier(0.2, 0.8, 0.2, 1);
+                        "
+                      >
+                        <div
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 6.159999999999999px;
+                            background: oklch(0.58 0.15 250);
+                            flex-shrink: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <svg
+                            width="16.8"
+                            height="16.8"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect
+                              x="3"
+                              y="5"
+                              width="18"
+                              height="14"
+                              rx="1.5"
+                            ></rect>
+                            <path d="M3 7l9 6 9-6"></path>
+                          </svg>
+                        </div>
+                        <div style="flex: 1; min-width: 0">
+                          <div
+                            style="
+                              display: flex;
+                              justify-content: space-between;
+                              font-size: 10.64px;
+                              opacity: 0.7;
+                              text-transform: uppercase;
+                              letter-spacing: 0.05em;
+                            "
+                          >
+                            <span>Mail</span><span>9:00</span>
+                          </div>
+                          <div
+                            style="
+                              font-size: 12.879999999999999px;
+                              font-weight: 600;
+                              margin-top: 1px;
+                            "
+                          >
+                            OpenBoardroom
+                          </div>
+                          <div
+                            style="
+                              font-size: 11.200000000000001px;
+                              opacity: 0.85;
+                              margin-top: 2px;
+                              line-height: 1.3;
+                            "
+                          >
+                            Mom&#x27;s birthday tomorrow. Don&#x27;t forget to
+                            call.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 7px;
+                      left: 50%;
+                      transform: translateX(-50%);
+                      width: 112px;
+                      height: 3px;
+                      border-radius: 3px;
+                      background: rgba(255, 255, 255, 0.5);
+                    "
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="bg-nb-paper-deep border-b border-nb-rule py-20 px-6">
+        <div class="mx-auto max-w-6xl">
+          <h2
+            class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-8"
+          >
+            Two ways in
+          </h2>
+          <div
+            class="grid grid-cols-1 border border-nb-rule bg-nb-paper lg:grid-cols-2"
+          >
+            <div
+              class="border-b border-nb-rule p-8 lg:border-b-0 lg:border-r lg:p-10"
+            >
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center bg-nb-amber-soft"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-bot h-5 w-5 text-nb-amber-deep"
+                  aria-hidden="true"
+                >
+                  <path d="M12 8V4H8"></path>
+                  <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                  <path d="M2 14h2"></path>
+                  <path d="M20 14h2"></path>
+                  <path d="M15 13v2"></path>
+                  <path d="M9 13v2"></path>
+                </svg>
+              </div>
+              <h3
+                class="font-serif text-4xl leading-tight tracking-tight text-nb-ink sm:text-5xl"
+              >
+                My agent reminds me
+              </h3>
+              <p
+                class="mt-4 text-base leading-relaxed text-nb-ink-soft max-w-[480px]"
+              >
+                Your agent already knows what is happening. OpenBoardroom is how
+                it reaches you when it matters: a call, a WhatsApp, an SMS, or
+                an email, escalating until you acknowledge. The chain runs on
+                our servers, so it keeps going after the session ends.
+              </p>
+              <ul class="mt-8 flex flex-col border-t border-nb-rule">
+                <li
+                  class="flex items-start gap-3 border-b border-nb-rule py-3.5"
+                >
+                  <span
+                    class="mt-[3px] font-mono text-[11px] text-nb-amber-deep flex-shrink-0"
+                    >→</span
+                  >
+                  <p class="text-sm leading-relaxed text-nb-ink">
+                    Your monitor sees production down. Your agent calls you
+                    through OpenBoardroom, then calls again if you do not press
+                    1.
+                  </p>
+                </li>
+                <li
+                  class="flex items-start gap-3 border-b border-nb-rule py-3.5"
+                >
+                  <span
+                    class="mt-[3px] font-mono text-[11px] text-nb-amber-deep flex-shrink-0"
+                    >→</span
+                  >
+                  <p class="text-sm leading-relaxed text-nb-ink">
+                    A long build or eval finishes at 3am. Your agent sends a
+                    WhatsApp, then rings you if you do not tap it.
+                  </p>
+                </li>
+                <li
+                  class="flex items-start gap-3 border-b border-nb-rule py-3.5"
+                >
+                  <span
+                    class="mt-[3px] font-mono text-[11px] text-nb-amber-deep flex-shrink-0"
+                    >→</span
+                  >
+                  <p class="text-sm leading-relaxed text-nb-ink">
+                    Your agent spots a domain or certificate expiring next week.
+                    It books a chain for the day before.
+                  </p>
+                </li>
+                <li
+                  class="flex items-start gap-3 border-b border-nb-rule py-3.5"
+                >
+                  <span
+                    class="mt-[3px] font-mono text-[11px] text-nb-amber-deep flex-shrink-0"
+                    >→</span
+                  >
+                  <p class="text-sm leading-relaxed text-nb-ink">
+                    A pull request has waited on your review for two days. Your
+                    agent texts you, then calls.
+                  </p>
+                </li>
+                <li
+                  class="flex items-start gap-3 border-b border-nb-rule py-3.5"
+                >
+                  <span
+                    class="mt-[3px] font-mono text-[11px] text-nb-amber-deep flex-shrink-0"
+                    >→</span
+                  >
+                  <p class="text-sm leading-relaxed text-nb-ink">
+                    Anything else your agent can notice. It decides what
+                    matters. OpenBoardroom makes sure you hear about it.
+                  </p>
+                </li>
+              </ul>
+              <a
+                href="#agents"
+                class="mt-8 inline-block border-b border-nb-ink pb-0.5 text-sm font-semibold text-nb-ink transition-opacity hover:opacity-70"
+                >Setup for agents →</a
+              >
+            </div>
+            <div class="p-8 lg:p-10">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-user h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+              </div>
+              <h3
+                class="font-serif text-4xl leading-tight tracking-tight text-nb-ink sm:text-5xl"
+              >
+                I remind myself
+              </h3>
+              <p
+                class="mt-4 text-base leading-relaxed text-nb-ink-soft max-w-[480px]"
+              >
+                Birthdays, renewals, tax deadlines, medication. Add it once on
+                the web, pick the channels in order, and OpenBoardroom escalates
+                until you acknowledge. No agent, no download, nothing to keep
+                running.
+              </p>
+              <a
+                class="mt-8 inline-block border-b border-nb-ink pb-0.5 text-sm font-semibold text-nb-ink transition-opacity hover:opacity-70"
+                href="/sign-in"
+                >Set your first reminder →</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        id="agents"
+        class="bg-nb-paper border-b border-nb-rule py-24 px-6"
+      >
+        <div class="mx-auto max-w-6xl">
+          <div
+            class="grid grid-cols-1 gap-12 lg:grid-cols-[1.1fr_1fr] lg:gap-20 items-start"
+          >
+            <div>
+              <p
+                class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-4"
+              >
+                For people who work with AI agents
+              </p>
+              <h2
+                class="font-serif text-6xl leading-[1.08] tracking-tight text-nb-ink sm:text-7xl mb-6"
+              >
+                Let your <em class="text-nb-amber-deep italic">agent</em> remind
+                you.
+              </h2>
+              <p
+                class="text-lg leading-relaxed text-nb-ink-soft max-w-[480px] mb-4"
+              >
+                Claude Code, Cursor, or any MCP host can create escalating
+                reminders for you. Tell your agent “call me on Friday at 9am if
+                I have not renewed the domain” and it schedules the whole chain
+                through OpenBoardroom.
+              </p>
+              <p
+                class="text-lg leading-relaxed text-nb-ink-soft max-w-[480px] mb-8"
+              >
+                The reminder fires from our servers, not from the agent. Close
+                the laptop, end the session, go offline. The phone still rings.
+              </p>
+              <a
+                class="inline-block border-b border-nb-ink pb-0.5 text-sm font-semibold text-nb-ink transition-opacity hover:opacity-70"
+                href="https://nudgebell.app/docs#mcp"
+                >Read the agent docs →</a
+              >
+            </div>
+            <div>
+              <div class="border border-nb-rule bg-nb-ink">
+                <div
+                  class="flex items-center justify-between gap-3 border-b border-nb-ink-soft/40 px-4 py-2.5"
+                >
+                  <p
+                    class="font-mono text-[10px] tracking-[0.12em] uppercase text-nb-paper/60"
+                  >
+                    Connect in one line
+                  </p>
+                  <button
+                    type="button"
+                    aria-label="Copy command"
+                    class="inline-flex items-center gap-1.5 border border-nb-rule bg-nb-paper px-2.5 py-1.5 font-mono text-[10px] tracking-[0.08em] uppercase text-nb-ink-soft transition-colors hover:text-nb-ink hover:border-nb-ink cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-copy h-3 w-3"
+                      aria-hidden="true"
+                    >
+                      <rect
+                        width="14"
+                        height="14"
+                        x="8"
+                        y="8"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path
+                        d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"
+                      ></path></svg
+                    >Copy</button
+                  ><span
+                    role="status"
+                    aria-live="polite"
+                    class="sr-only"
+                  ></span>
+                </div>
+                <pre
+                  class="overflow-x-auto px-4 py-4 font-mono text-[12px] leading-relaxed text-nb-paper whitespace-pre-wrap break-words"
+                ><code>claude mcp add --transport http openboardroom https://YOUR_BACKEND_HOST/api/v1/mcp --header &quot;Authorization: Bearer YOUR_API_KEY&quot;</code></pre>
+              </div>
+              <p class="mt-3 font-mono text-[11px] text-nb-ink-mute">
+                Example only. Connect your own backend and replace
+                YOUR_BACKEND_HOST and YOUR_API_KEY before using this command.
+              </p>
+              <div class="mt-8 grid grid-cols-1 border-t border-nb-rule">
+                <div
+                  class="flex items-start gap-4 border-b border-nb-rule py-4"
+                >
+                  <div
+                    class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center bg-nb-amber-soft"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-bot h-4 w-4 text-nb-amber-deep"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 8V4H8"></path>
+                      <rect width="16" height="12" x="4" y="8" rx="2"></rect>
+                      <path d="M2 14h2"></path>
+                      <path d="M20 14h2"></path>
+                      <path d="M15 13v2"></path>
+                      <path d="M9 13v2"></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-[15px] font-semibold text-nb-ink">
+                      Any agent
+                    </p>
+                    <p class="mt-0.5 text-sm leading-relaxed text-nb-ink-soft">
+                      Claude Code, Cursor, any MCP host, or your own code over
+                      the REST API.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-start gap-4 border-b border-nb-rule py-4"
+                >
+                  <div
+                    class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center bg-nb-amber-soft"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-server h-4 w-4 text-nb-amber-deep"
+                      aria-hidden="true"
+                    >
+                      <rect
+                        width="20"
+                        height="8"
+                        x="2"
+                        y="2"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <rect
+                        width="20"
+                        height="8"
+                        x="2"
+                        y="14"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <line x1="6" x2="6.01" y1="6" y2="6"></line>
+                      <line x1="6" x2="6.01" y1="18" y2="18"></line>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-[15px] font-semibold text-nb-ink">
+                      Runs on our servers
+                    </p>
+                    <p class="mt-0.5 text-sm leading-relaxed text-nb-ink-soft">
+                      Nothing to install, nothing to keep running.
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-start gap-4 border-b border-nb-rule py-4"
+                >
+                  <div
+                    class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center bg-nb-amber-soft"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.75"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-layers h-4 w-4 text-nb-amber-deep"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"
+                      ></path>
+                      <path
+                        d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"
+                      ></path>
+                      <path
+                        d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"
+                      ></path>
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-[15px] font-semibold text-nb-ink">
+                      Same escalation
+                    </p>
+                    <p class="mt-0.5 text-sm leading-relaxed text-nb-ink-soft">
+                      Up to 5 steps, any channel in any order, and it keeps
+                      going until you acknowledge.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section
+        id="how-it-works"
+        class="bg-nb-paper border-b border-nb-rule py-24 px-6"
+      >
+        <div class="mx-auto max-w-6xl">
+          <div class="mb-14">
+            <p
+              class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-4"
+            >
+              How it works
+            </p>
+            <h2
+              class="font-serif text-6xl leading-[1.08] tracking-tight text-nb-ink sm:text-7xl"
+            >
+              Set it once.
+              <em class="text-nb-amber-deep italic">We handle the rest.</em>
+            </h2>
+          </div>
+          <div class="grid grid-cols-1 border-t border-nb-rule sm:grid-cols-3">
+            <div class="pt-10 pb-2 pr-8 sm:border-r sm:border-nb-rule">
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase text-nb-amber-deep mb-4"
+              >
+                Step 01
+              </p>
+              <h3 class="font-serif text-[2rem] leading-tight text-nb-ink mb-3">
+                Add what you want to remember
+              </h3>
+              <p class="text-base leading-relaxed text-nb-ink-soft">
+                A birthday, a renewal, a deadline. Give it a title and a date.
+              </p>
+            </div>
+            <div class="pt-10 pb-2 pr-8 sm:border-r sm:border-nb-rule sm:pl-8">
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase text-nb-amber-deep mb-4"
+              >
+                Step 02
+              </p>
+              <h3 class="font-serif text-[2rem] leading-tight text-nb-ink mb-3">
+                Pick a channel
+              </h3>
+              <p class="text-base leading-relaxed text-nb-ink-soft">
+                WhatsApp, SMS, email, or a phone call. Whatever you&#x27;re most
+                likely to see.
+              </p>
+            </div>
+            <div class="pt-10 pb-2 pr-8 sm:pl-8">
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase text-nb-amber-deep mb-4"
+              >
+                Step 03
+              </p>
+              <h3 class="font-serif text-[2rem] leading-tight text-nb-ink mb-3">
+                Live your life
+              </h3>
+              <p class="text-base leading-relaxed text-nb-ink-soft">
+                We&#x27;ll nudge you on the day, where you&#x27;re already
+                looking. You won&#x27;t miss it.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="use-cases" class="bg-nb-paper py-24 px-6">
+        <div class="mx-auto max-w-6xl">
+          <div
+            class="mb-14 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+          >
+            <div>
+              <p
+                class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-4"
+              >
+                One product, every kind of reminder
+              </p>
+              <h2
+                class="font-serif text-6xl leading-[1.08] tracking-tight text-nb-ink sm:text-7xl"
+              >
+                Different things,
+                <em class="text-nb-amber-deep italic">different channels.</em
+                ><br />You pick what fits.
+              </h2>
+            </div>
+          </div>
+          <div
+            class="grid grid-cols-1 border border-nb-rule bg-nb-paper-deep sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <div
+              class="bg-nb-paper p-8 border-r border-nb-rule border-b border-nb-rule"
+            >
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-heart h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M2 9.5a5.5 5.5 0 0 1 9.591-3.676.56.56 0 0 0 .818 0A5.49 5.49 0 0 1 22 9.5c0 2.29-1.5 4-3 5.5l-5.492 5.313a2 2 0 0 1-3 .019L5 15c-1.5-1.5-3-3.2-3-5.5"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Birthdays &amp; anniversaries
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Days ahead, so you have time to plan the gift, the reservation,
+                the flowers.
+              </p>
+            </div>
+            <div
+              class="bg-nb-paper p-8 border-r border-nb-rule border-b border-nb-rule"
+            >
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-credit-card h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                  <line x1="2" x2="22" y1="10" y2="10"></line>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Subscription renewals
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Heads-up three days before the charge. Cancel it, keep it, or
+                decide.
+              </p>
+            </div>
+            <div class="bg-nb-paper p-8 border-b border-nb-rule">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-pill h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"
+                  ></path>
+                  <path d="m8.5 8.5 7 7"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Medication &amp; health
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                For you or someone you care for. The nudge that actually lands,
+                every time.
+              </p>
+            </div>
+            <div
+              class="bg-nb-paper p-8 border-r border-nb-rule border-b border-nb-rule"
+            >
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-file-text h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z"
+                  ></path>
+                  <path d="M14 2v5a1 1 0 0 0 1 1h5"></path>
+                  <path d="M10 9H8"></path>
+                  <path d="M16 13H8"></path>
+                  <path d="M16 17H8"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Tax &amp; deadlines
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Filings, submissions, consequences. The ones you cannot afford
+                to miss.
+              </p>
+            </div>
+            <div
+              class="bg-nb-paper p-8 border-r border-nb-rule border-b border-nb-rule"
+            >
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-briefcase h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                  <rect width="20" height="14" x="2" y="6" rx="2"></rect>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Client follow-ups
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                The deal went cold because you forgot to reply. Not again.
+              </p>
+            </div>
+            <div class="bg-nb-paper p-8 border-b border-nb-rule">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-graduation-cap h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
+                  ></path>
+                  <path d="M22 10v6"></path>
+                  <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                School &amp; kids
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Parent-teacher meetings, fees, activities. Right before you walk
+                out the door.
+              </p>
+            </div>
+            <div class="bg-nb-paper p-8 border-r border-nb-rule">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-banknote h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <rect width="20" height="12" x="2" y="6" rx="2"></rect>
+                  <circle cx="12" cy="12" r="2"></circle>
+                  <path d="M6 12h.01M18 12h.01"></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Loan &amp; bill payments
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Every payment, every month, on time. No surprise late fees.
+              </p>
+            </div>
+            <div class="bg-nb-paper p-8 border-r border-nb-rule">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-book-open h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path d="M12 7v14"></path>
+                  <path
+                    d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Document renewals
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Six months out. Passports, visas, licenses. Before they ruin the
+                trip.
+              </p>
+            </div>
+            <div class="bg-nb-paper p-8">
+              <div
+                class="mb-6 flex h-11 w-11 items-center justify-center border border-nb-rule bg-nb-paper-deep"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="lucide lucide-plane h-5 w-5 text-nb-ink"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+                  ></path>
+                </svg>
+              </div>
+              <h3 class="text-lg font-semibold text-nb-ink mb-2">
+                Travel &amp; check-in
+              </h3>
+              <p class="text-sm leading-relaxed text-nb-ink-soft">
+                Check-in windows, hotels, insurance. The details that make or
+                break the trip.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="bg-nb-paper-deep border-y border-nb-rule py-24 px-6">
+        <div class="mx-auto max-w-6xl">
+          <div
+            class="grid grid-cols-1 gap-16 lg:grid-cols-2 lg:gap-20 items-center"
+          >
+            <div>
+              <h2
+                class="font-serif text-6xl leading-[1.08] tracking-tight text-nb-ink sm:text-7xl mb-5"
+              >
+                Want it <em class="text-nb-amber-deep italic">louder?</em
+                ><br />Build a chain
+              </h2>
+              <p
+                class="text-lg leading-relaxed text-nb-ink-soft mb-3 max-w-[460px]"
+              >
+                Most reminders only need one nudge. But for the ones you truly
+                cannot miss. Stack channels in any order, with your own delays
+                between each step.
+              </p>
+              <p
+                class="font-mono text-[11px] tracking-[0.08em] uppercase text-nb-ink-mute mb-8"
+              >
+                Example chain: you pick the channels and set the gaps
+              </p>
+              <div class="flex flex-col">
+                <div>
+                  <div
+                    class="flex items-center gap-4 py-4 px-5 border border-nb-rule bg-nb-paper"
+                  >
+                    <div
+                      class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-[oklch(0.58_0.15_250)]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-mail w-4 h-4 text-white"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"
+                        ></path>
+                        <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[15px] font-semibold text-nb-ink">Email</p>
+                      <p class="font-mono text-[11px] text-nb-ink-mute mt-0.5">
+                        Send on the day at 9:00 AM
+                      </p>
+                    </div>
+                    <p
+                      class="font-mono text-[10px] tracking-widest uppercase text-nb-ink-mute hidden sm:block"
+                    >
+                      Step 01
+                    </p>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 pl-[52px] pr-5 py-2 border-x border-nb-rule bg-nb-paper-deep"
+                  >
+                    <div class="w-px h-3 bg-nb-rule flex-shrink-0"></div>
+                    <p
+                      class="font-mono text-[10px] tracking-[0.08em] uppercase text-nb-ink-mute"
+                    >
+                      If no response in 8 hours
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    class="flex items-center gap-4 py-4 px-5 border border-nb-rule bg-nb-paper"
+                  >
+                    <div
+                      class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-[oklch(0.62_0.14_155)]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-message-circle w-4 h-4 text-white"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[15px] font-semibold text-nb-ink">
+                        WhatsApp
+                      </p>
+                      <p class="font-mono text-[11px] text-nb-ink-mute mt-0.5">
+                        +8 hours later
+                      </p>
+                    </div>
+                    <p
+                      class="font-mono text-[10px] tracking-widest uppercase text-nb-ink-mute hidden sm:block"
+                    >
+                      Step 02
+                    </p>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 pl-[52px] pr-5 py-2 border-x border-nb-rule bg-nb-paper-deep"
+                  >
+                    <div class="w-px h-3 bg-nb-rule flex-shrink-0"></div>
+                    <p
+                      class="font-mono text-[10px] tracking-[0.08em] uppercase text-nb-ink-mute"
+                    >
+                      If no response in 12 hours
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    class="flex items-center gap-4 py-4 px-5 border border-nb-rule bg-nb-paper"
+                  >
+                    <div
+                      class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-[oklch(0.70_0.16_145)]"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-message-square w-4 h-4 text-white"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[15px] font-semibold text-nb-ink">SMS</p>
+                      <p class="font-mono text-[11px] text-nb-ink-mute mt-0.5">
+                        +12 hours later
+                      </p>
+                    </div>
+                    <p
+                      class="font-mono text-[10px] tracking-widest uppercase text-nb-ink-mute hidden sm:block"
+                    >
+                      Step 03
+                    </p>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 pl-[52px] pr-5 py-2 border-x border-nb-rule bg-nb-paper-deep"
+                  >
+                    <div class="w-px h-3 bg-nb-rule flex-shrink-0"></div>
+                    <p
+                      class="font-mono text-[10px] tracking-[0.08em] uppercase text-nb-ink-mute"
+                    >
+                      If no response in 6 hours
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <div
+                    class="flex items-center gap-4 py-4 px-5 border border-nb-rule bg-nb-paper"
+                  >
+                    <div
+                      class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 bg-nb-amber-deep"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.75"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="lucide lucide-phone w-4 h-4 text-white"
+                        aria-hidden="true"
+                      >
+                        <path
+                          d="M13.832 16.568a1 1 0 0 0 1.213-.303l.355-.465A2 2 0 0 1 17 15h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2A18 18 0 0 1 2 4a2 2 0 0 1 2-2h3a2 2 0 0 1 2 2v3a2 2 0 0 1-.8 1.6l-.468.351a1 1 0 0 0-.292 1.233 14 14 0 0 0 6.392 6.384"
+                        ></path>
+                      </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[15px] font-semibold text-nb-ink">
+                        Phone call
+                      </p>
+                      <p class="font-mono text-[11px] text-nb-ink-mute mt-0.5">
+                        +6 hours later
+                      </p>
+                    </div>
+                    <p
+                      class="font-mono text-[10px] tracking-widest uppercase text-nb-ink-mute hidden sm:block"
+                    >
+                      Step 04
+                    </p>
+                  </div>
+                </div>
+                <div
+                  class="flex items-center gap-3 px-5 py-3.5 border border-t-0 border-nb-rule bg-nb-paper-deep"
+                >
+                  <div
+                    class="w-6 h-6 rounded-full bg-[oklch(0.70_0.14_160)] flex items-center justify-center flex-shrink-0"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="lucide lucide-check w-3 h-3 text-white"
+                      aria-hidden="true"
+                    >
+                      <path d="M20 6 9 17l-5-5"></path>
+                    </svg>
+                  </div>
+                  <p class="text-[13px] text-nb-ink-soft">
+                    Stops the moment you acknowledge. No further nudges.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="hidden lg:flex justify-center">
+              <div
+                style="
+                  width: 280px;
+                  height: 640px;
+                  position: relative;
+                  border-radius: 39.2px;
+                  background: linear-gradient(
+                    160deg,
+                    oklch(0.22 0.01 70),
+                    oklch(0.14 0.01 70)
+                  );
+                  padding: 9.8px;
+                  box-shadow:
+                    0 30px 60px -20px rgba(0, 0, 0, 0.35),
+                    0 0 0 1px oklch(0.08 0.01 70),
+                    inset 0 0 0 2px oklch(0.3 0.01 70);
+                "
+              >
+                <div
+                  style="
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 30.8px;
+                    overflow: hidden;
+                    background:
+                      radial-gradient(
+                        120% 60% at 50% 0%,
+                        oklch(0.28 0.04 55) 0%,
+                        transparent 50%
+                      ),
+                      linear-gradient(
+                        180deg,
+                        oklch(0.2 0.02 70) 0%,
+                        oklch(0.12 0.02 70) 100%
+                      );
+                    position: relative;
+                    font-family: var(--font-geist-sans), system-ui, sans-serif;
+                  "
+                >
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      padding: 14px 25.2px 7px;
+                      color: rgba(255, 255, 255, 0.9);
+                      font-size: 15.4px;
+                      font-weight: 600;
+                    "
+                  >
+                    <span>9:12</span
+                    ><span style="display: flex; gap: 4px; align-items: center"
+                      ><svg
+                        width="16.8"
+                        height="11.200000000000001"
+                        viewBox="0 0 16 10"
+                      >
+                        <path
+                          d="M0 8h2v2H0zm4-2h2v4H4zm4-2h2v6H8zm4-3h2v9h-2z"
+                          fill="currentColor"
+                        ></path></svg
+                      ><svg
+                        width="16.8"
+                        height="11.200000000000001"
+                        viewBox="0 0 20 10"
+                      >
+                        <rect
+                          x="0"
+                          y="1"
+                          width="16"
+                          height="8"
+                          rx="2"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="1"
+                        ></rect>
+                        <rect
+                          x="2"
+                          y="3"
+                          width="12"
+                          height="4"
+                          rx="1"
+                          fill="currentColor"
+                        ></rect>
+                        <rect
+                          x="17"
+                          y="4"
+                          width="2"
+                          height="2"
+                          fill="currentColor"
+                        ></rect></svg
+                    ></span>
+                  </div>
+                  <div
+                    style="
+                      position: absolute;
+                      top: 11.200000000000001px;
+                      left: 50%;
+                      transform: translateX(-50%);
+                      width: 89.60000000000001px;
+                      height: 23.8px;
+                      border-radius: 999px;
+                      background: #000;
+                    "
+                  ></div>
+                  <div
+                    style="
+                      padding: 8.4px 14px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8.4px;
+                    "
+                  >
+                    <div
+                      style="
+                        text-align: center;
+                        color: #fff;
+                        margin-top: 11.200000000000001px;
+                        margin-bottom: 4.2px;
+                      "
+                    >
+                      <div
+                        data-phone-date
+                        style="font-size: 14px; opacity: 0.8"
+                      >
+                         
+                      </div>
+                      <div
+                        style="
+                          font-size: 50.4px;
+                          font-weight: 200;
+                          letter-spacing: -0.02em;
+                          line-height: 0.95;
+                        "
+                      >
+                        9:12
+                      </div>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6.159999999999999px;
+                      "
+                    >
+                      <div
+                        style="
+                          padding: 8.4px 11.200000000000001px;
+                          border-radius: 11.200000000000001px;
+                          background: oklch(0.25 0.015 70 / 0.55);
+                          backdrop-filter: blur(20px);
+                          border: 1px solid rgba(255, 255, 255, 0.08);
+                          box-shadow: 0 0 0 2px oklch(0.72 0.17 55 / 0.3);
+                          color: #fff;
+                          display: flex;
+                          gap: 8.4px;
+                          align-items: flex-start;
+                          animation: nbSlideIn 0.5s
+                            cubic-bezier(0.2, 0.8, 0.2, 1);
+                        "
+                      >
+                        <div
+                          style="
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 6.159999999999999px;
+                            background: oklch(0.58 0.15 250);
+                            flex-shrink: 0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                          "
+                        >
+                          <svg
+                            width="16.8"
+                            height="16.8"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="#fff"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <rect
+                              x="3"
+                              y="5"
+                              width="18"
+                              height="14"
+                              rx="1.5"
+                            ></rect>
+                            <path d="M3 7l9 6 9-6"></path>
+                          </svg>
+                        </div>
+                        <div style="flex: 1; min-width: 0">
+                          <div
+                            style="
+                              display: flex;
+                              justify-content: space-between;
+                              font-size: 10.64px;
+                              opacity: 0.7;
+                              text-transform: uppercase;
+                              letter-spacing: 0.05em;
+                            "
+                          >
+                            <span>Mail</span><span>9:00</span>
+                          </div>
+                          <div
+                            style="
+                              font-size: 12.879999999999999px;
+                              font-weight: 600;
+                              margin-top: 1px;
+                            "
+                          >
+                            OpenBoardroom
+                          </div>
+                          <div
+                            style="
+                              font-size: 11.200000000000001px;
+                              opacity: 0.85;
+                              margin-top: 2px;
+                              line-height: 1.3;
+                            "
+                          >
+                            Mom&#x27;s birthday tomorrow. Don&#x27;t forget to
+                            call.
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      position: absolute;
+                      bottom: 7px;
+                      left: 50%;
+                      transform: translateX(-50%);
+                      width: 112px;
+                      height: 3px;
+                      border-radius: 3px;
+                      background: rgba(255, 255, 255, 0.5);
+                    "
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="bg-nb-dark py-28 px-6">
+        <div class="mx-auto max-w-6xl">
+          <div class="grid grid-cols-1 gap-20 lg:grid-cols-2 lg:items-center">
+            <div>
+              <p
+                class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-paper/40 mb-5"
+              >
+                Feedback on the original inspiration, NudgeBell
+              </p>
+              <h2
+                class="font-serif text-6xl leading-[1.05] tracking-tight text-nb-paper sm:text-7xl"
+              >
+                People who kept forgetting,
+                <em class="text-nb-amber italic">finally stopped.</em>
+              </h2>
+            </div>
+            <div class="flex flex-col gap-6">
+              <a
+                href="https://x.com/minnns_aheya/status/2039567312618160153?s=20"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block p-8 bg-nb-dark-panel border border-nb-dark-rule transition-colors hover:border-nb-paper/20"
+                style="transform: rotate(-0.3deg)"
+                ><p class="font-serif text-[22px] leading-[1.35] text-nb-paper">
+                  “Forgotten subscriptions have burned me too many times.
+                  NudgeBell looks like a saver.”
+                </p>
+                <div
+                  class="mt-5 pt-5 border-t border-nb-dark-rule flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <p class="text-[14px] font-semibold text-nb-paper">
+                      Minnnn
+                    </p>
+                    <p class="font-mono text-[11px] text-nb-paper/40 mt-0.5">
+                      @minnns_aheya
+                    </p>
+                  </div>
+                  <p
+                    class="font-mono text-[10px] text-nb-amber tracking-[0.08em] uppercase flex-shrink-0"
+                  >
+                    via X
+                  </p>
+                </div></a
+              ><a
+                href="https://x.com/JamesJames518/status/2037254413677646185?s=20"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block p-8 bg-nb-dark-panel border border-nb-dark-rule transition-colors hover:border-nb-paper/20"
+                style="transform: rotate(0.3deg)"
+                ><p class="font-serif text-[22px] leading-[1.35] text-nb-paper">
+                  “Love the idea, multi-channel escalation is exactly what
+                  people need to stop surprise charges.”
+                </p>
+                <div
+                  class="mt-5 pt-5 border-t border-nb-dark-rule flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <p class="text-[14px] font-semibold text-nb-paper">James</p>
+                    <p class="font-mono text-[11px] text-nb-paper/40 mt-0.5">
+                      @JamesJames518
+                    </p>
+                  </div>
+                  <p
+                    class="font-mono text-[10px] text-nb-amber tracking-[0.08em] uppercase flex-shrink-0"
+                  >
+                    via X
+                  </p>
+                </div></a
+              ><a
+                href="https://www.linkedin.com/feed/update/urn:li:activity:7442966182149652481?commentUrn=urn%3Ali%3Acomment%3A%28activity%3A7442966182149652481%2C7442982425598578688%29&amp;dashCommentUrn=urn%3Ali%3Afsd_comment%3A%287442982425598578688%2Curn%3Ali%3Aactivity%3A7442966182149652481%29"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="block p-8 bg-nb-dark-panel border border-nb-dark-rule transition-colors hover:border-nb-paper/20"
+                style="transform: rotate(-0.3deg)"
+                ><p class="font-serif text-[22px] leading-[1.35] text-nb-paper">
+                  “The escalating reminder approach you&#x27;ve built sounds
+                  like it could really help people stay on top of these things.”
+                </p>
+                <div
+                  class="mt-5 pt-5 border-t border-nb-dark-rule flex items-center justify-between gap-4"
+                >
+                  <div>
+                    <p class="text-[14px] font-semibold text-nb-paper">
+                      Kurt Wellington
+                    </p>
+                    <p class="font-mono text-[11px] text-nb-paper/40 mt-0.5">
+                      VP Product
+                    </p>
+                  </div>
+                  <p
+                    class="font-mono text-[10px] text-nb-amber tracking-[0.08em] uppercase flex-shrink-0"
+                  >
+                    via LinkedIn
+                  </p>
+                </div></a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <section id="pricing" class="bg-nb-paper py-24 px-6">
+        <div class="mx-auto max-w-6xl">
+          <div class="text-center mb-12">
+            <h2
+              class="font-serif text-5xl leading-[1.08] tracking-tight text-nb-ink sm:text-6xl"
+            >
+              One missed renewal pays for
+              <em class="text-nb-amber-deep italic"
+                >a year of OpenBoardroom.</em
+              >
+            </h2>
+            <p class="mt-5 text-[17px] text-nb-ink-soft max-w-lg mx-auto">
+              Pick the plan that fits how often you need reminding. Change or
+              cancel anytime.
+            </p>
+          </div>
+          <div class="flex items-center justify-center gap-4 mb-10">
+            <button
+              class="text-sm font-semibold transition-colors cursor-pointer text-nb-ink-mute"
+            >
+              Monthly</button
+            ><button
+              class="relative inline-flex h-6 cursor-pointer items-center rounded-full bg-nb-ink transition-colors"
+              aria-label="Toggle billing period"
+              style="width: 48px"
+            >
+              <span
+                class="inline-block h-4 w-4 transform rounded-full bg-nb-amber shadow-sm transition-transform translate-x-7"
+              ></span></button
+            ><button
+              class="text-sm font-semibold transition-colors cursor-pointer text-nb-ink"
+            >
+              Yearly
+              <span
+                class="ml-1.5 font-mono text-[10px] tracking-widest uppercase text-nb-amber-deep"
+                >2 months free</span
+              >
+            </button>
+          </div>
+          <div class="grid gap-0 sm:grid-cols-3 border border-nb-rule">
+            <div
+              class="relative flex flex-col p-8 bg-nb-paper border-b sm:border-b-0 sm:border-r border-nb-rule"
+            >
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase mb-1 text-nb-ink-mute"
+              >
+                Personal use
+              </p>
+              <h3 class="font-serif text-4xl text-nb-ink">Starter</h3>
+              <div class="mt-5 flex items-baseline gap-1">
+                <span class="font-serif text-5xl text-nb-ink">$4</span
+                ><span class="text-sm text-nb-ink-mute">/mo</span>
+              </div>
+              <p class="mt-1 font-mono text-[11px] text-nb-ink-mute">
+                $48/yr billed annually
+              </p>
+              <ul class="mt-8 flex flex-col gap-3 flex-1">
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Up to 5 active reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >250 credits/month
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >All four channels
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Optional escalation chains
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Recurring reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Cancel anytime
+                </li>
+              </ul>
+              <a
+                class="mt-10 block w-full py-3 text-center text-sm font-semibold transition-opacity hover:opacity-80 bg-nb-ink text-nb-paper"
+                href="/sign-in?redirect_url=%2Fpricing%3Fplan%3Dstarter%26interval%3Dyearly"
+                >Choose plan</a
+              >
+            </div>
+            <div
+              class="relative flex flex-col p-8 bg-nb-dark border-b sm:border-b-0 sm:border-r border-nb-rule"
+            >
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase text-nb-amber mb-4"
+              >
+                Most picked
+              </p>
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase mb-1 text-nb-paper/40"
+              >
+                Regular use
+              </p>
+              <h3 class="font-serif text-4xl text-nb-paper">Pro</h3>
+              <div class="mt-5 flex items-baseline gap-1">
+                <span class="font-serif text-5xl text-nb-paper">$12</span
+                ><span class="text-sm text-nb-paper/40">/mo</span>
+              </div>
+              <p class="mt-1 font-mono text-[11px] text-nb-paper/40">
+                $144/yr billed annually
+              </p>
+              <ul class="mt-8 flex flex-col gap-3 flex-1">
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Up to 15 active reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >1,200 credits/month
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >All four channels
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Optional escalation chains
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Recurring reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-paper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Cancel anytime
+                </li>
+              </ul>
+              <a
+                class="mt-10 block w-full py-3 text-center text-sm font-semibold transition-opacity hover:opacity-80 bg-nb-amber-deep text-white"
+                href="/sign-in?redirect_url=%2Fpricing%3Fplan%3Dpro%26interval%3Dyearly"
+                >Choose plan</a
+              >
+            </div>
+            <div class="relative flex flex-col p-8 bg-nb-paper">
+              <p
+                class="font-mono text-[10px] tracking-[0.10em] uppercase mb-1 text-nb-ink-mute"
+              >
+                Power user
+              </p>
+              <h3 class="font-serif text-4xl text-nb-ink">Power</h3>
+              <div class="mt-5 flex items-baseline gap-1">
+                <span class="font-serif text-5xl text-nb-ink">$39</span
+                ><span class="text-sm text-nb-ink-mute">/mo</span>
+              </div>
+              <p class="mt-1 font-mono text-[11px] text-nb-ink-mute">
+                $468/yr billed annually
+              </p>
+              <ul class="mt-8 flex flex-col gap-3 flex-1">
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Up to Unlimited active reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >4,500 credits/month
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >All four channels
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Optional escalation chains
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Recurring reminders
+                </li>
+                <li class="flex items-center gap-3 text-sm text-nb-ink">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-check h-4 w-4 shrink-0 text-nb-amber"
+                    aria-hidden="true"
+                  >
+                    <path d="M20 6 9 17l-5-5"></path></svg
+                  >Cancel anytime
+                </li>
+              </ul>
+              <a
+                class="mt-10 block w-full py-3 text-center text-sm font-semibold transition-opacity hover:opacity-80 bg-nb-ink text-nb-paper"
+                href="/sign-in?redirect_url=%2Fpricing%3Fplan%3Dpower%26interval%3Dyearly"
+                >Choose plan</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="bg-nb-paper-deep border-t border-nb-rule py-24 px-6">
+        <div class="mx-auto max-w-4xl">
+          <p
+            class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-8"
+          >
+            Don&#x27;t let it happen again.
+          </p>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-5 py-6 border-t border-nb-rule">
+              <span class="font-mono text-[11px] text-nb-ink-mute flex-shrink-0"
+                >01</span
+              ><span
+                class="font-serif text-3xl text-nb-ink leading-snug flex-1 line-through decoration-nb-rule decoration-1 sm:text-4xl"
+                >Netflix renewed last month. You noticed in your bank
+                statement.</span
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5 text-nb-alert flex-shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </div>
+            <div class="flex items-center gap-5 py-6 border-t border-nb-rule">
+              <span class="font-mono text-[11px] text-nb-ink-mute flex-shrink-0"
+                >02</span
+              ><span
+                class="font-serif text-3xl text-nb-ink leading-snug flex-1 line-through decoration-nb-rule decoration-1 sm:text-4xl"
+                >The anniversary passed. The apology was awkward.</span
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5 text-nb-alert flex-shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </div>
+            <div
+              class="flex items-center gap-5 py-6 border-t border-nb-rule border-b border-nb-rule"
+            >
+              <span class="font-mono text-[11px] text-nb-ink-mute flex-shrink-0"
+                >03</span
+              ><span
+                class="font-serif text-3xl text-nb-ink leading-snug flex-1 line-through decoration-nb-rule decoration-1 sm:text-4xl"
+                >The tax deadline came. The reminder came a day too late.</span
+              ><svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="lucide lucide-x h-5 w-5 text-nb-alert flex-shrink-0"
+                aria-hidden="true"
+              >
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-16 text-center">
+            <h2
+              class="font-serif text-7xl leading-[1.05] tracking-tight text-nb-ink sm:text-8xl"
+            >
+              Start a nudge.<br /><em class="text-nb-amber-deep italic"
+                >Stop forgetting.</em
+              >
+            </h2>
+            <a
+              class="mt-10 inline-block bg-nb-ink text-nb-paper px-10 py-4 text-base font-semibold transition-opacity hover:opacity-80"
+              href="/sign-in"
+              >Get started →</a
+            >
+            <p
+              class="mt-5 font-mono text-[10px] tracking-[0.08em] uppercase text-nb-ink-mute"
+            >
+              Set up your first nudge in 2 minutes
+            </p>
+          </div>
+        </div>
+      </section>
+      <section id="faq" class="bg-nb-paper border-t border-nb-rule py-24 px-6">
+        <div class="mx-auto max-w-3xl">
+          <p
+            class="font-mono text-[10px] font-medium tracking-[0.12em] uppercase text-nb-ink-mute mb-4"
+          >
+            FAQ
+          </p>
+          <h2
+            class="font-serif text-5xl leading-[1.08] tracking-tight text-nb-ink sm:text-6xl"
+          >
+            Frequently asked
+            <em class="text-nb-amber-deep italic">questions.</em>
+          </h2>
+          <div
+            data-slot="accordion"
+            class="flex w-full flex-col mt-12 border-t border-nb-rule"
+            data-orientation="vertical"
+          >
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_27l8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_7l8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Do I need to download an app?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_27l8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_7l8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  No. OpenBoardroom is a web app. It works on any device from
+                  your browser: no download, no installation, nothing.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2bl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_bl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Can I set recurring reminders?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2bl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_bl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Yes. Daily, weekly, monthly, and yearly recurrence is
+                  supported. Set it once and it fires automatically on schedule
+                  forever until you turn it off.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2fl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_fl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  What channels can I use?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2fl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_fl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Email, SMS, WhatsApp, and voice calls. All four channels are
+                  available on every plan.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2jl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_jl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  What happens if I miss the call?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2jl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_jl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  If you do not pick up, or voicemail answers, most of the
+                  call&#x27;s credits come back to your wallet (a few are kept
+                  to cover the carrier&#x27;s answering-machine detection). The
+                  chain carries on: the next step fires after its own configured
+                  delay, so you still get notified.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2nl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_nl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  What are credits?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2nl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_nl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Credits are what power your notifications. Each channel costs
+                  a different number of credits: cheaper for email, more for
+                  calls. Your plan gives you credits every month and unused ones
+                  roll over.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2rl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_rl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Can I buy more credits?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2rl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_rl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Yes. You can purchase additional credits anytime from your
+                  dashboard, with or without a plan.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_2vl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_vl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  What if I want to cancel?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_2vl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_vl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Cancel anytime. Your remaining credits stay in your wallet and
+                  keep working until they run out. We never delete your
+                  reminders.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_33l8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_13l8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Can my agent message someone else?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_33l8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_13l8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  No. There is no recipient field. Reminders only ever go to the
+                  phone number and email verified on your own account, whether
+                  you or your agent created them.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_37l8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_17l8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Does it work when my agent is off?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_37l8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_17l8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Yes. The chain runs on our servers. Close the laptop, end the
+                  session, go offline. The reminder still fires.
+                </p>
+              </div>
+            </div>
+            <div
+              data-state="closed"
+              data-orientation="vertical"
+              data-slot="accordion-item"
+              class="not-last:border-b border-nb-rule"
+            >
+              <h3 data-orientation="vertical" data-state="closed" class="flex">
+                <button
+                  type="button"
+                  aria-controls="radix-_R_3bl8ltnb_"
+                  aria-expanded="false"
+                  data-state="closed"
+                  data-orientation="vertical"
+                  id="radix-_R_1bl8ltnb_"
+                  data-slot="accordion-trigger"
+                  class="group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent py-2.5 transition-all outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:after:border-ring disabled:pointer-events-none disabled:opacity-50 **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-muted-foreground text-left text-base font-semibold text-nb-ink hover:no-underline hover:text-nb-amber-deep"
+                  data-radix-collection-item=""
+                >
+                  Is my phone number safe?<svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-down pointer-events-none shrink-0 group-aria-expanded/accordion-trigger:hidden"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m6 9 6 6 6-6"></path></svg
+                  ><svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="lucide lucide-chevron-up pointer-events-none hidden shrink-0 group-aria-expanded/accordion-trigger:inline"
+                    aria-hidden="true"
+                    data-slot="accordion-trigger-icon"
+                  >
+                    <path d="m18 15-6-6-6 6"></path>
+                  </svg>
+                </button>
+              </h3>
+              <div
+                data-state="closed"
+                id="radix-_R_3bl8ltnb_"
+                hidden=""
+                role="region"
+                aria-labelledby="radix-_R_1bl8ltnb_"
+                data-orientation="vertical"
+                data-slot="accordion-content"
+                class="overflow-hidden text-sm data-open:animate-accordion-down data-closed:animate-accordion-up"
+                style="
+                  --radix-accordion-content-height: var(
+                    --radix-collapsible-content-height
+                  );
+                  --radix-accordion-content-width: var(
+                    --radix-collapsible-content-width
+                  );
+                "
+              >
+                <p>
+                  Yes. Your phone number is used only to deliver reminders you
+                  have personally scheduled. We never share it or send anything
+                  you have not set up.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="bg-nb-paper border-t border-nb-rule py-10 px-6">
+      <p class="mb-6 text-center text-xs text-nb-ink-mute">
+        External documentation and legal links refer to NudgeBell, the
+        original inspiration. This OpenBoardroom site is a frontend demo.
+      </p>
+      <div class="mx-auto max-w-6xl">
+        <div
+          class="flex flex-col items-center gap-6 text-center sm:flex-row sm:justify-between sm:text-left"
+        >
+          <a
+            class="font-serif text-xl text-nb-ink transition-opacity hover:opacity-70"
+            href="#"
+            >OpenBoardroom</a
+          >
+          <div class="flex flex-wrap justify-center gap-6">
+            <a
+              class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+              href="https://nudgebell.app/pricing#faq"
+              >FAQ</a
+            ><a
+              class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+              href="https://nudgebell.app/docs"
+              >Reference API &amp; MCP Docs</a
+            ><a
+              class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+              href="https://nudgebell.app/privacy"
+              >Privacy Policy</a
+            ><a
+              class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+              href="https://nudgebell.app/terms"
+              >Terms of Service</a
+            ><a
+              class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+              href="https://nudgebell.app/refund"
+              >Refund Policy</a
+            >
+          </div>
+          <div class="flex items-center gap-4 text-nb-ink-mute">
+            <a
+              href="https://x.com/ayushp81"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="transition-colors hover:text-nb-ink"
+              aria-label="X (Twitter)"
+              ><svg viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4">
+                <path
+                  d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.265 5.638L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z"
+                ></path></svg></a
+            ><span class="text-nb-rule">·</span
+            ><a
+              href="mailto:hello@openboardroom.tech"
+              class="text-sm transition-colors hover:text-nb-ink"
+              >hello@openboardroom.tech</a
+            >
+          </div>
+        </div>
+        <nav
+          aria-label="More pages"
+          class="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-3 border-t border-nb-rule-soft pt-6"
+        >
+          <a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/pricing"
+            >Pricing</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/blog"
+            >Blog</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/reminder-app-that-calls-you"
+            >Reminder app that calls you</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/whatsapp-reminder-app"
+            >WhatsApp reminder app</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/subscription-renewal-reminder"
+            >Subscription renewal reminder</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/reminder-app-for-forgetful-people"
+            >Reminder app for forgetful people</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/birthday-reminder-app"
+            >Birthday reminder app</a
+          ><a
+            class="text-sm text-nb-ink-mute transition-colors hover:text-nb-ink"
+            href="https://nudgebell.app/adhd-reminder-app"
+            >ADHD reminder app</a
+          >
+        </nav>
+        <p class="mt-8 text-center font-mono text-[11px] text-nb-ink-mute">
+          © 2026 OpenBoardroom. All rights reserved.
+        </p>
+      </div>
+    </footer>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+    <dialog id="reminder-dialog" aria-labelledby="demo-title">
+      <div class="demo-heading">
+        <span class="demo-eyebrow">LOCAL FRONTEND DEMO</span
+        ><button type="button" id="close-demo" aria-label="Close reminder demo">
+          ×
+        </button>
+      </div>
+      <h2 id="demo-title">Start a <em>nudge.</em></h2>
+      <p class="demo-description">
+        Try the flow. Reminders stay in this browser; no messages or calls are
+        sent.
+      </p>
+      <p id="selected-plan" hidden></p>
+      <form id="reminder-form">
+        <label for="reminder-title">What do you want to remember?</label>
+        <input
+          id="reminder-title"
+          name="title"
+          placeholder="Mom’s birthday"
+          maxlength="120"
+          required
+        />
+        <div class="demo-fields">
+          <div>
+            <label for="reminder-date">When</label
+            ><input
+              id="reminder-date"
+              name="date"
+              type="datetime-local"
+              required
+            />
+          </div>
+          <div>
+            <label for="reminder-channel">Channel</label
+            ><select id="reminder-channel" name="channel">
+              <option>Phone call</option>
+              <option>WhatsApp</option>
+              <option>SMS</option>
+              <option>Email</option>
+            </select>
+          </div>
+        </div>
+        <button class="demo-submit" type="submit">
+          Create demo reminder →
+        </button>
+      </form>
+      <div id="reminders" aria-live="polite"></div>
+    </dialog>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -1,71 +1,11 @@
-# Virtual environments
-.venv/
-venv/
-env/
-.env/
-ENV/
-
-# Python bytecode & caches
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-
-# Packaging / build
-build/
+node_modules/
 dist/
-*.egg
-*.egg-info/
-.eggs/
-pip-wheel-metadata/
-
-# uv: commit uv.lock for reproducible installs (do not ignore)
-
-# Testing & coverage
-.pytest_cache/
-.coverage
-.coverage.*
-htmlcov/
-.tox/
-.nox/
-hypothesis/
-.hypothesis/
-
-# Type checkers & linters
-.mypy_cache/
-.ruff_cache/
-.dmypy.json
-dmypy.json
-
-# Jupyter
-.ipynb_checkpoints/
-
-# Environment & secrets (do not commit API keys)
+test-results/
+playwright-report/
 .env
 .env.*
 !.env.example
-
-# OS
 .DS_Store
-Thumbs.db
-
-# Editors / IDEs
 .idea/
 *.swp
 *.swo
-*~
-
-# Generated wiki files
-.kiro/
-
-# Generated smoke-training artifacts. Commit grpo_output/rewards.csv and
-# grpo_output/reward_curve.png only after replacing smoke output with a real run.
-grpo_output/
-kaggle_output/
-
-# Judge-facing demo artifacts are intentionally not ignored.
-!demo_output/
-demo_output/.matplotlib/
-
-# .vscode/
